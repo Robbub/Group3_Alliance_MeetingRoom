@@ -1,0 +1,15 @@
+.typography-style{
+    color: black;
+}
+
+.small{
+    font-size: 12px;
+}
+
+.medium{
+    font-size: 24px;
+}
+
+.large{
+    font-size: 50px;
+}

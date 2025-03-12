@@ -1,0 +1,42 @@
+{
+  "name": "reactbasecode",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "webpack serve --config webpack/webpack.config.js --env env=dev --open",
+    "build": "webpack --config webpack/webpack.config.js --env env=prod",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.3",
+    "@mui/material": "^6.4.3",
+    "@toolpad/core": "^0.12.0",
+    "axios": "^1.7.9",
+    "formik": "^2.4.6",
+    "react": "^19.0.0",
+    "react-dev-utils": "^12.0.1",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.1.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.7",
+    "@babel/plugin-transform-runtime": "^7.25.9",
+    "@babel/preset-env": "^7.26.7",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "babel": "^5.8.38",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "json-server": "^1.0.0-beta.3",
+    "style-loader": "^4.0.0",
+    "typescript": "^5.7.3",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  }
+}
