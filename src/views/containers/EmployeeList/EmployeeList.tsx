@@ -1,7 +1,11 @@
 import { Container } from "@mui/material";
 import React from "react";
+import { CallBack } from "../../../react_class/hooks/useCallback/useCallBack";
 
-import "./employee-list-style.css";
 export const EmployeeList: React.FC<{}> = () => {
-  return <Container maxWidth="sm"></Container>;
+  return (
+    <Container maxWidth="sm">
+      <CallBack />
+    </Container>
+  );
 };
