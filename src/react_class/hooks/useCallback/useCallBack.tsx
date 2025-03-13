@@ -4,7 +4,7 @@ export const CallBack = () => {
   const [number, setNumber] = useState<number>(1);
   const [dark, setDark] = useState<boolean>(false);
 
-  // const getItems = useCallback((): number[] => {
+  // const getItems = useCallback(() => {
   //   return [number, number + 1, number + 2];
   // }, [number]);
 
@@ -14,7 +14,7 @@ export const CallBack = () => {
 
   const theme: React.CSSProperties = {
     backgroundColor: dark ? "#00000057" : "white",
-    color: dark ? "black" : "white",
+    color: dark ? "black" : "white"
   };
 
   return (
