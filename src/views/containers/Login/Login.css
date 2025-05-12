@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+}
+
+.login-page{
+  width: 100%;
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 90px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-title {
+  color: #64442F;
+  margin-bottom: 20px;
+}
+
+.login-container .form-group input {
+  color: #64442F;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #64442F;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  border-color: #64442F;
+  color: #64442F;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  color: #64442F;
+}
+
+.login-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #9C6644;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.login-button a {
+  text-decoration: none;
+  color: white;
+}
+
+.company-email-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #EDE0D4;
+  color: #64442F;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.signup-link {
+  margin-top: 15px;
+}
+
+.signup-link a {
+  color: #64442F;
+  text-decoration: none;
+}
+
+.forgot-password {
+  color: #64442F;
+  text-decoration: none;
+}

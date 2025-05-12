@@ -19,6 +19,26 @@ export const PATHS = {
   NOT_FOUND: {
     path: "*",
     label: "Not Found"
+  },
+  REGISTER: {
+    path: "/register",
+    label: "Register",
+  },
+  HOMEPAGE: {
+    path: "/homepage",
+    label: "Homepage",
+  },
+  UPCOMING: {
+    path: "/upcoming",
+    label: "Upcoming",
+  },
+  PAST: {
+    path: "/past",
+    label: "Past",
+  },
+  BROWSE: {
+    path: "/browse",
+    label: "Browse",
   }
   // Add more routes here
 };

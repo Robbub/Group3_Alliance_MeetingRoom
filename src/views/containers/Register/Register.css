@@ -1,0 +1,96 @@
+.register-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.register-page{
+  width: 100%;
+}
+
+.register-container .form-group input {
+  color: #64442F;
+}
+
+.register-header {
+  margin-bottom: 20px;
+}
+
+.logo {
+  height: 50px;
+}
+
+.register-title {
+  color: #64442F;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #64442F;
+}
+
+.form-group input {
+  max-width: 100%;
+  width: 400px;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  border-color: #DDB892;
+  color: #DDB892;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  color: #64442F;
+}
+
+.register-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #9C6644;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.company-email-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #EDE0D4;
+  color: #64442F;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.back-link {
+  margin-top: 15px;
+}
+
+.back-link a {
+  color: #64442F;
+  text-decoration: none;
+}

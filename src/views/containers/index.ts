@@ -3,3 +3,8 @@ export * from "./NotFound";
 export * from "./Dashboard";
 export * from "./Login";
 export * from "./Logout";
+export * from "./Register/Register";
+export * from "./Homepage/Homepage";
+export * from "./Upcoming/Upcoming";
+export * from "./Past/Past";
+export * from "./Browse/Browse";
