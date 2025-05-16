@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import "./Header.css";
@@ -6,6 +6,7 @@ import "./Header.css";
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -15,6 +16,20 @@ export const Header = () => {
     localStorage.removeItem("user"); 
     navigate("/login"); 
   };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsDropdownOpen(false);
+      }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="header">
@@ -28,7 +43,7 @@ export const Header = () => {
         <a href="/browse">BROWSE</a>
         <a href="/upcoming">MANAGE</a>
       </nav>
-      <div className="user-menu">
+      <div className="user-menu" ref={dropdownRef}>
         <button className="dropdown-toggle" onClick={toggleDropdown}>
           <FaBars className="menu-icon" />
           <FaUserCircle className="user-icon" />
@@ -36,9 +51,9 @@ export const Header = () => {
         {isDropdownOpen && (
           <div className="dropdown-content">
             <a href="/notifications">Notifications</a>
-            <a href="/reservations">Reservations</a>
-            <a href="/account">Account</a>
+            <hr />
             <a href="/help-center">Help Center</a>
+            <a href="/preferences">Preferences</a>
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>
