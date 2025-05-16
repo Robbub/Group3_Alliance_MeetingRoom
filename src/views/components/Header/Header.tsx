@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router-dom";
 import "./Header.css";
 
 export const Header = () => {
@@ -39,9 +39,9 @@ export const Header = () => {
         </a>
       </div>
       <nav className="nav-links">
-        <a href="/homepage">ABOUT US</a>
-        <a href="/browse">BROWSE</a>
-        <a href="/upcoming">MANAGE</a>
+        <Link to="/homepage">ABOUT US</Link>
+        <Link to="/browse">BROWSE</Link>
+        <Link to="/upcoming">MANAGE</Link>
       </nav>
       <div className="user-menu" ref={dropdownRef}>
         <button className="dropdown-toggle" onClick={toggleDropdown}>
@@ -50,10 +50,10 @@ export const Header = () => {
         </button>
         {isDropdownOpen && (
           <div className="dropdown-content">
-            <a href="/notifications">Notifications</a>
+            <Link to="/notifications">Notifications</Link>
             <hr />
-            <a href="/help-center">Help Center</a>
-            <a href="/preferences">Preferences</a>
+            <Link to="/help-center">Help Center</Link>
+            <Link to="/preferences">Preferences</Link>
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>
