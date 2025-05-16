@@ -53,6 +53,14 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={PATHS.ADMIN.path}
+          element={
+            <ProtectedRoute>
+              <Views.Admin />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

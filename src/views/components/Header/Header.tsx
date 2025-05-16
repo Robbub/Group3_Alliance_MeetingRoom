@@ -1,3 +1,4 @@
+// src/components/Header/Header.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
@@ -7,6 +8,9 @@ export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // [NEW] Get current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem("user") || "null");
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -41,7 +45,9 @@ export const Header = () => {
       <nav className="nav-links">
         <Link to="/homepage">ABOUT US</Link>
         <Link to="/browse">BROWSE</Link>
-        <Link to="/upcoming">MANAGE</Link>
+        <Link to={currentUser?.username === "admin" ? "/admin" : "/upcoming"}>
+          MANAGE
+        </Link>
       </nav>
       <div className="user-menu" ref={dropdownRef}>
         <button className="dropdown-toggle" onClick={toggleDropdown}>
@@ -50,13 +56,21 @@ export const Header = () => {
         </button>
         {isDropdownOpen && (
           <div className="dropdown-content">
+            {/* [NEW] Show username if logged in */}
+            {currentUser && (
+              <div className="user-info">
+                Logged in as: {currentUser.username}
+              </div>
+            )}
             <Link to="/notifications">Notifications</Link>
             <hr />
             <Link to="/help-center">Help Center</Link>
             <Link to="/preferences">Preferences</Link>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
+            {currentUser && (
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            )}
           </div>
         )}
       </div>

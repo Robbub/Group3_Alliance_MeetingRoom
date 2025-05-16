@@ -18,6 +18,11 @@
     {
       "username": "jack",
       "password": "password"
+    },
+    { 
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
     }
   ]
 }
