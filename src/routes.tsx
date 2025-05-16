@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import * as Views from "./views/containers";
 import { PATHS } from "./constant";
 import { ProtectedRoute } from "./ProtectedRoute";

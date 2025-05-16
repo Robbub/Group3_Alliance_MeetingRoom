@@ -17,7 +17,7 @@ export const Register = () => {
     }
 
     try {
-      await fetch("/users", {
+      await fetch("http://localhost:3000/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: formData.username, password: formData.password }),
@@ -80,9 +80,9 @@ export const Register = () => {
             <button type="submit" className="register-button">
               Sign Up
             </button>
-            <button className="company-email-button">
+            {/* <button className="company-email-button">
               Continue with Company Email
-            </button>
+            </button> */}
           </form>
         </div>
       </div>

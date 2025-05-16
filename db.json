@@ -1,23 +1,46 @@
 {
   "statistics": [
     {
-      "report1": "Sample Response 1"
+      "report1": "Sample Response 1",
+      "id": "1b3a"
     },
     {
-      "report2": "Sample Response 2"
+      "report2": "Sample Response 2",
+      "id": "aa35"
     }
   ],
   "participants": [
-    { "id": 1, "name": "John Doe" },
-    { "id": 2, "name": "Jane Smith" },
-    { "id": 3, "name": "Alice Johnson" },
-    { "id": 4, "name": "Bob Brown" },
-    { "id": 5, "name": "Charlie Davis" }
+    {
+      "id": "1",
+      "name": "John Doe"
+    },
+    {
+      "id": "2",
+      "name": "Jane Smith"
+    },
+    {
+      "id": "3",
+      "name": "Alice Johnson"
+    },
+    {
+      "id": "4",
+      "name": "Bob Brown"
+    },
+    {
+      "id": "5",
+      "name": "Charlie Davis"
+    }
   ],
   "users": [
     {
       "username": "jack",
-      "password": "password"
+      "password": "password",
+      "id": "3b4f"
+    },
+    {
+      "id": "2077",
+      "username": "user",
+      "password": "user"
     }
   ]
 }
