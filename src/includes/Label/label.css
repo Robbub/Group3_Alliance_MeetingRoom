@@ -1,0 +1,15 @@
+.label-style{
+  color: rgb(120, 120, 204);
+}
+
+.label-small {
+    font-size: 12px;
+}
+
+.label-medium {
+    font-size: 24px;
+}
+
+.label-large {
+    font-size: 64px;
+}

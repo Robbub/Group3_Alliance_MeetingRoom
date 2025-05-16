@@ -1,32 +1,58 @@
-// import { Route, Routes } from "react-router";
-// import * as Views from "./views/containers";
-
-// export const AppRoutes = () => {
-//   return (
-//     <Routes>
-//       <Route path="employee-list" element={<Views.EmployeeList />} />
-//       <Route path="employee-add" element={<Views.EmployeeForm />} />
-//       <Route path="employee-details" element={<Views.EmployeeDetails />} />
-
-//       <Route path="*" element={<Views.NotFoundScreen />} />
-//     </Routes>
-//   );
-// };
-
-// TODO
 import { BrowserRouter, Route, Routes } from "react-router";
 import * as Views from "./views/containers";
+import { PATHS } from "./constant";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 export const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Views.MainScreen />}>
-          <Route path="employee-list" element={<Views.EmployeeList />} />
-          <Route path="employee-add" element={<Views.EmployeeForm />} />
-          <Route path="employee-details" element={<Views.EmployeeDetails />} />
-        </Route>
-        <Route path="*" element={<Views.NotFoundScreen />} />
+        {/* Public Routes */}
+        <Route path={PATHS.LOGIN.path} element={<Views.Login />} />
+        <Route path={PATHS.REGISTER.path} element={<Views.Register />} />
+        <Route path={PATHS.NOT_FOUND.path} element={<Views.NotFound />} />
+
+        {/* Protected Routes */}
+        <Route
+          path={PATHS.HOMEPAGE.path}
+          element={
+            <ProtectedRoute>
+              <Views.Homepage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.UPCOMING.path}
+          element={
+            <ProtectedRoute>
+              <Views.Upcoming />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.PAST.path}
+          element={
+            <ProtectedRoute>
+              <Views.Past />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.BROWSE.path}
+          element={
+            <ProtectedRoute>
+              <Views.Browse />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.DASHBOARD.path}
+          element={
+            <ProtectedRoute>
+              <Views.Dashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

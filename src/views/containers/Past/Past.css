@@ -1,0 +1,116 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+}
+
+.past-bookings-container {
+  background-color: #f5f5f5;
+  width: 100%;
+  /* padding: 20px; */
+}
+
+.past-bookings-title {
+  color: #64442F;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 45px;
+  font-weight: bolder;
+}
+
+.past-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.past-tab-button {
+  padding: 10px 20px;
+  background-color: #64442F;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  margin: 0 10px;
+  width: 150px;
+}
+
+.past-tab-button a {
+  text-decoration: none;
+  color: white;
+  font-weight: 700;
+}
+
+.past-tab-button.active {
+  background-color: #EDE0D4;
+  color: #64442F;
+}
+
+.past-tab-button.active a {
+  text-decoration: none;
+  color: #64442F;
+  font-weight: 700;
+} 
+
+.past-bookings-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  margin-left: 290px; 
+}
+
+.past-booking-card {
+  display: flex;
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  width: 80%;
+  max-width: 800px;
+  align-items: center;
+}
+
+.past-room-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  margin-right: 20px;
+}
+
+.past-booking-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align details to the left */
+}
+
+.past-booking-details-label {
+  font-weight: bold;
+  color: #64442F;
+}
+
+.past-booking-details h3 {
+  font-weight: normal;
+  color: #9C6644;
+  display: inline;
+}
+
+.past-booking-details p {
+  color: #9C6644;
+  margin: 5px 0;
+  display: inline;
+}
+
+.past-booking-details-row {
+  display: flex;
+  justify-content: flex-start; /* Align details to the left */
+  margin-bottom: 10px;
+}
+
+.past-booking-details-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-right: 20px; /* Add margin to separate columns */
+}
