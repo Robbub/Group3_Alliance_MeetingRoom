@@ -51,7 +51,7 @@ export const Header = () => {
         {isDropdownOpen && (
           <div className="dropdown-content">
             <Link to="/notifications">Notifications</Link>
-            <Link to="/preferences">Preferences</Link>
+            <Link to="/settings">Settings</Link>
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>

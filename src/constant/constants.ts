@@ -39,6 +39,10 @@ export const PATHS = {
   BROWSE: {
     path: "/browse",
     label: "Browse",
+  },
+  SETTINGS: {
+    path: "/settings",
+    label: "Settings"
   }
   // Add more routes here
 };

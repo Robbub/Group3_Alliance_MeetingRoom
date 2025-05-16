@@ -53,6 +53,19 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={PATHS.SETTINGS.path}
+          element={
+            <ProtectedRoute>
+              <Views.Settings />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="account" element={<Views.AccountSettings />} />
+          <Route path="security" element={<Views.SecuritySettings />} />
+          <Route path="notifications" element={<Views.NotificationSettings />} />
+          <Route path="appearance" element={<Views.AppearanceSettings />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

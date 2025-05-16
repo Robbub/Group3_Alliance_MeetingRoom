@@ -4,7 +4,14 @@ import { AppRoutes } from "./routes";
 
 const App = () => {
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        width: "100%",
+      }}
+    >
       <AppRoutes />
     </Box>
   );
