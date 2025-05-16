@@ -99,6 +99,13 @@ body {
   z-index: 999;
 }
 
+.modal-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .modal-content {
   background-color: #fbeedf;
   border-radius: 20px;
@@ -205,12 +212,20 @@ body {
   background-color: #f2d7c3;
 }
 
+.modal-arrow-left,
+.modal-arrow-right {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .modal-arrow-left {
-  left: 590px;
+  right: 101%;
+  margin-left: 16px;
 }
 
 .modal-arrow-right {
-  right: 590px;
+  left: 101%;
+  margin-right: 16px;
 }
 
 .close {

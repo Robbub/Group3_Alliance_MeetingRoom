@@ -139,59 +139,61 @@ export const Browse = () => {
 
       {isModalOpen && selectedRoom && (
         <div className="modal" onClick={closeModal}>
-          <button
-            className="modal-arrow modal-arrow-left"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateRoom(-1);
-            }}
-          >
-            <FaChevronLeft />
-          </button>
+          <div className="modal-wrapper">
+            <button
+              className="modal-arrow modal-arrow-left"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateRoom(-1);
+              }}
+            >
+              <FaChevronLeft />
+            </button>
 
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <span className="close" onClick={closeModal}>
-              &times;
-            </span>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <span className="close" onClick={closeModal}>
+                &times;
+              </span>
 
-            <img
-              src={selectedRoom.image}
-              alt={selectedRoom.name}
-              className="modal-image"
-            />
+              <img
+                src={selectedRoom.image}
+                alt={selectedRoom.name}
+                className="modal-image"
+              />
 
-            <div className="modal-details">
-              <h2>{selectedRoom.name.toUpperCase()}</h2>
-              <p><strong>FLOOR:</strong> {selectedRoom.floor}</p>
-              <p><strong>AMENITIES:</strong></p>
-              <ul>
-                {selectedRoom.amenities.map((amenity, index) => (
-                  <li key={index}>{amenity}</li>
-                ))}
-              </ul>
-              <p><strong>Capacity:</strong> {selectedRoom.capacity}</p>
+              <div className="modal-details">
+                <h2>{selectedRoom.name.toUpperCase()}</h2>
+                <p><strong>FLOOR:</strong> {selectedRoom.floor}</p>
+                <p><strong>AMENITIES:</strong></p>
+                <ul>
+                  {selectedRoom.amenities.map((amenity, index) => (
+                    <li key={index}>{amenity}</li>
+                  ))}
+                </ul>
+                <p><strong>Capacity:</strong> {selectedRoom.capacity}</p>
 
-              <button
-                className="book-button"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setShowBookingModal(true);
-                }}
-              >
-                BOOK
-              </button>
+                <button
+                  className="book-button"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setShowBookingModal(true);
+                  }}
+                >
+                  BOOK
+                </button>
+              </div>
             </div>
-          </div>
 
-          <button
-            className="modal-arrow modal-arrow-right"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateRoom(1);
-            }}
-          >
-            <FaChevronRight />
-          </button>
+            <button
+              className="modal-arrow modal-arrow-right"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateRoom(1);
+              }}
+            >
+              <FaChevronRight />
+            </button>
+          </div>
         </div>
       )}
 
