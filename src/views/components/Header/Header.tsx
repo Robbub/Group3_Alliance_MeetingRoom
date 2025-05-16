@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router-dom";
 import "./Header.css";
 import { Link } from "react-router-dom";
 
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -16,6 +17,20 @@ export const Header = () => {
     localStorage.removeItem("user"); 
     navigate("/login"); 
   };
+
+  const handleClickOutside = (event: MouseEvent) => {
+    const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsDropdownOpen(false);
+      }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="header">
@@ -29,7 +44,7 @@ export const Header = () => {
         <Link to="/browse">BROWSE ROOMS</Link>
         <Link to="/upcoming">MANAGE MEETINGS</Link>
       </nav>
-      <div className="user-menu">
+      <div className="user-menu" ref={dropdownRef}>
         <button className="dropdown-toggle" onClick={toggleDropdown}>
           <FaBars className="menu-icon" />
           <FaUserCircle className="user-icon" />
@@ -37,9 +52,7 @@ export const Header = () => {
         {isDropdownOpen && (
           <div className="dropdown-content">
             <Link to="/notifications">Notifications</Link>
-            <Link to="/reservations">Settings</Link>
-            {/* <a to="/account">Account</a>
-            <a to="/help-center">Help Center</a> */}
+            <Link to="/preferences">Preferences</Link>
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>
