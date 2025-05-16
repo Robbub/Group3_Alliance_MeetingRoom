@@ -115,10 +115,12 @@ export const Admin: React.FC = () => {
 
   return (
     <div className="room-management-container">
-      <h2>Room Management</h2>
-      <button className="add-room-btn" onClick={openAddModal}>
-        Add New Room
-      </button>
+      <div className="heading">
+        <h2>ROOM MANAGEMENT</h2>
+        <button className="add-room-btn" onClick={openAddModal}>
+          Add New Room
+        </button>
+      </div>
 
       <table className="rooms-table">
         <thead>
@@ -150,7 +152,7 @@ export const Admin: React.FC = () => {
         </tbody>
       </table>
 
-      {/* Add Room Modal */}
+      {/* add room modal */}
       {isAddModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
