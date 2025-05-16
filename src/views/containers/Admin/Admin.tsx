@@ -156,7 +156,7 @@ export const Admin: React.FC = () => {
       {isAddModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
-            <h3>Add New Room</h3>
+            <h3>ADD NEW ROOM</h3>
             <div className="form-group">
               <label>Room Name:</label>
               <input

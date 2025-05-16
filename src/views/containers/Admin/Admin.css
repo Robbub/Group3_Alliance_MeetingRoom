@@ -158,6 +158,11 @@
   position: relative;
 }
 
+.modal h3 {
+  margin-top: 0px;
+  color: #64442F;
+}
+
 
 .modal-content {
   display: flex;
