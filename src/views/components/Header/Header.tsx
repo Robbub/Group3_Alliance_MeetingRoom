@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import "./Header.css";
+import { Link } from "react-router-dom";
 
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -19,14 +20,14 @@ export const Header = () => {
   return (
     <header className="header">
       <div className="logo">
-        <a href="/homepage">
+        <Link to="/homepage">
           <img src="/assets/summit-logo.png" alt="SUMMITFLOW" />
-        </a>
+        </Link>
       </div>
       <nav className="nav-links">
-        <a href="/homepage">ABOUT US</a>
-        <a href="/browse">BROWSE</a>
-        <a href="/upcoming">MANAGE</a>
+        <Link to="/homepage">HOME</Link>
+        <Link to="/browse">BROWSE ROOMS</Link>
+        <Link to="/upcoming">MANAGE MEETINGS</Link>
       </nav>
       <div className="user-menu">
         <button className="dropdown-toggle" onClick={toggleDropdown}>
@@ -35,10 +36,10 @@ export const Header = () => {
         </button>
         {isDropdownOpen && (
           <div className="dropdown-content">
-            <a href="/notifications">Notifications</a>
-            <a href="/reservations">Reservations</a>
-            <a href="/account">Account</a>
-            <a href="/help-center">Help Center</a>
+            <Link to="/notifications">Notifications</Link>
+            <Link to="/reservations">Settings</Link>
+            {/* <a to="/account">Account</a>
+            <a to="/help-center">Help Center</a> */}
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>

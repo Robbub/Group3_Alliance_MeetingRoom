@@ -41,7 +41,7 @@ export const Login = () => {
         <h1 className="login-title">LOG IN</h1>
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username/Email</label>
+            <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
@@ -66,20 +66,20 @@ export const Login = () => {
               required
             />
           </div>
-          <div className="form-options">
+          {/* <div className="form-options">
             <label>
               <input type="checkbox" /> Remember for 30 days
             </label>
             <a href="/forgot-password" className="forgot-password">
               Forget password?
             </a>
-          </div>
+          </div> */}
           <button type="submit" className="login-button">
             Log In
           </button>
-          <button className="company-email-button">
+          {/* <button className="company-email-button">
             Continue with Company Email
-          </button>
+          </button> */}
         </form>
         <div className="signup-link">
           New User? <a href="/register">Sign Up</a>

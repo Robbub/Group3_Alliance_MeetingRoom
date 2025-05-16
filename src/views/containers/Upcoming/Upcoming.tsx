@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
 import "./Upcoming.css";
@@ -77,12 +78,8 @@ export const Upcoming = () => {
         <Header />
         <h1 className="upcoming-bookings-title">Manage Bookings</h1>
         <div className="upcoming-tabs">
-          <button className="upcoming-tab-button active">
-            <a href="/upcoming">Upcoming</a>
-          </button>
-          <button className="upcoming-tab-button">
-            <a href="/past">Past</a>
-          </button>
+          <Link to="/upcoming" className="upcoming-tab-button active">Upcoming</Link>
+          <Link to="/past" className="upcoming-tab-button">Past</Link>
         </div>
         <div className="upcoming-bookings-list">
           {bookings.map((booking) => (
