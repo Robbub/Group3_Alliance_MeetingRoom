@@ -53,14 +53,14 @@ display: flex;
 .menu-icon {
   height: 20px !important; 
   width: 20px !important;
-  margin-left: 15px;
+  margin-left: 10px;
   color: #64442F;
 }
 
 .user-icon {
   height: 30px !important; 
   width: 30px !important;
-  margin-right: 10px;
+  margin-right: 5px;
   color: #64442F;
 }
 
