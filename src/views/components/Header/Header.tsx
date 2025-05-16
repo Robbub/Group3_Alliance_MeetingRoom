@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaBars, FaUserCircle } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import "./Header.css";
-import { Link } from "react-router-dom";
 
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
