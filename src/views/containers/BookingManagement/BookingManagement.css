@@ -253,6 +253,7 @@ header .calendar-current-date {
   padding-bottom: 10px;
   font-weight: 200;
   color: #5b5b5b;
+  background-color: black;
 }
 
 .big-calendar-table td {

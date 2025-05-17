@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Add this import
 import './Admin.css';
 
 
@@ -25,6 +26,7 @@ const initialRooms: Room[] = [
 ];
 
 export const Admin: React.FC = () => {
+  const navigate = useNavigate(); // Add this line
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -116,6 +118,9 @@ export const Admin: React.FC = () => {
   return (
     <div className="room-management-container">
       <div className="heading">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          &#8592; Back
+        </button>
         <h2>ROOM MANAGEMENT</h2>
         <button className="add-room-btn" onClick={openAddModal}>
           Add New Room

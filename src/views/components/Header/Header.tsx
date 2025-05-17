@@ -48,7 +48,7 @@ export const Header = () => {
         <Link to={currentUser?.username === "admin" ? "/admin" : "/upcoming"}>
           MANAGE MEETINGS
         </Link>
-        <a href="/bookingmanagement">CALENDAR</a>
+        <Link to="/bookingmanagement">CALENDAR</Link>
       </nav>
       <div className="user-menu" ref={dropdownRef}>
         <button className="dropdown-toggle" onClick={toggleDropdown}>
