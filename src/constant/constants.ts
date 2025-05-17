@@ -43,6 +43,10 @@ export const PATHS = {
   BOOKING_MANAGEMENT: {
     path: "/bookingmanagement",
     label: "BookingManagement",
+  },
+  ANALYTICS: {
+    path: "/analytics",
+    label: "Analytics",
   }
   // Add more routes here
 };

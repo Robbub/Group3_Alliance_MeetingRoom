@@ -61,6 +61,14 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={PATHS.ANALYTICS.path}
+          element={
+            <ProtectedRoute>
+              <Views.Analytics />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
