@@ -64,7 +64,7 @@ export const Header = () => {
               </div>
             )}
             <Link to="/notifications">Notifications</Link>
-            <Link to="/preferences">Preferences</Link>
+            <Link to="/settings">Settings</Link>
             {currentUser && (
               <button onClick={handleLogout} className="logout-button">
                 Logout
