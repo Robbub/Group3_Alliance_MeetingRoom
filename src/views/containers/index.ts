@@ -15,3 +15,4 @@ export { default as AccountSettings } from "./Settings/AccountSettings";
 export { default as SecuritySettings } from "./Settings/SecuritySettings";
 export { default as NotificationSettings } from "./Settings/NotificationSettings";
 export { default as AppearanceSettings } from "./Settings/AppearanceSettings";
+export * from "./Analytics/Analytics"

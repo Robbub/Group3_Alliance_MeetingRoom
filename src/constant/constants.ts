@@ -51,6 +51,10 @@ export const PATHS = {
   SETTINGS: {
     path: "/settings",
     label: "Settings"
+  },
+  ANALYTICS: {
+    path: "/analytics",
+    label: "Analytics",
   }
   // Add more routes here
 };

@@ -75,6 +75,14 @@ export const AppRoutes = () => {
           <Route path="notifications" element={<Views.NotificationSettings />} />
           <Route path="appearance" element={<Views.AppearanceSettings />} />
         </Route>
+        <Route
+          path={PATHS.ANALYTICS.path}
+          element={
+            <ProtectedRoute>
+              <Views.Analytics />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
