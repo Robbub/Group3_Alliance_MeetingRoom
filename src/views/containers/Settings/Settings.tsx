@@ -2,6 +2,7 @@ import React from "react";
 import SideNavBar, { NavItem } from "../../components/SideNavBar/SideNavBar";
 import { Header } from "../../components/Header/Header";
 import { Outlet } from "react-router-dom";
+import "./Settings.css";
 
 export const navItems = [
   { label: 'Account', path: 'account' },
