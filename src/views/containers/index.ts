@@ -9,3 +9,4 @@ export * from "./Upcoming/Upcoming";
 export * from "./Past/Past";
 export * from "./Browse/Browse";
 export * from "./Admin/Admin";
+export * from "./BookingManagement/BookingManagement";
