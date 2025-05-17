@@ -27,6 +27,7 @@ export const Header = () => {
         <a href="/homepage">ABOUT US</a>
         <a href="/browse">BROWSE</a>
         <a href="/upcoming">MANAGE</a>
+        <a href="/bookingmanagement">CALENDAR</a>
       </nav>
       <div className="user-menu">
         <button className="dropdown-toggle" onClick={toggleDropdown}>

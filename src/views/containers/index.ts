@@ -8,3 +8,4 @@ export * from "./Homepage/Homepage";
 export * from "./Upcoming/Upcoming";
 export * from "./Past/Past";
 export * from "./Browse/Browse";
+export * from "./BookingManagement/BookingManagement";

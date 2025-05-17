@@ -17,10 +17,10 @@
 }
 
 .footer-section_logo-section p {
-  white-space: pre-wrap; /* Preserve line breaks and spacing */
-  margin: 10px 0; /* Add spacing around the paragraph */
-  font-size: 14px; /* Adjust font size if needed */
-  line-height: 1.5; /* Adjust line height for readability */
+  white-space: pre-wrap; 
+  margin: 10px 0; 
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .footer-section {
