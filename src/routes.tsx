@@ -11,16 +11,9 @@ export const AppRoutes = () => {
         <Route path={PATHS.LOGIN.path} element={<Views.Login />} />
         <Route path={PATHS.REGISTER.path} element={<Views.Register />} />
         <Route path={PATHS.NOT_FOUND.path} element={<Views.NotFound />} />
+        <Route path={PATHS.HOMEPAGE.path} element={<Views.Homepage />} />
 
         {/* Protected Routes */}
-        <Route
-          path={PATHS.HOMEPAGE.path}
-          element={
-            <ProtectedRoute>
-              <Views.Homepage />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path={PATHS.UPCOMING.path}
           element={
