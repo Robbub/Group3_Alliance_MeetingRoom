@@ -83,6 +83,16 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* New User Management Route */}
+        <Route
+          path={PATHS.USER_MANAGEMENT.path}
+          element={
+            <ProtectedRoute>
+              <Views.UserManagement />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

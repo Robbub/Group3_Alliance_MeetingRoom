@@ -8,8 +8,7 @@ export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // [NEW] Get current user from localStorage
+
   const currentUser = JSON.parse(localStorage.getItem("user") || "null");
 
   const toggleDropdown = () => {
@@ -17,15 +16,15 @@ export const Header = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user"); 
-    navigate("/login"); 
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as Node;
-      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
-        setIsDropdownOpen(false);
-      }
+    if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+      setIsDropdownOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -42,14 +41,24 @@ export const Header = () => {
           <img src="/assets/summit-logo.png" alt="SUMMITFLOW" />
         </Link>
       </div>
+
       <nav className="nav-links">
-        <Link to="/homepage">HOME</Link>
-        <Link to="/browse">BROWSE ROOMS</Link>
-        <Link to={currentUser?.username === "admin" ? "/admin" : "/upcoming"}>
-          MANAGE MEETINGS
-        </Link>
-        <Link to="/bookingmanagement">CALENDAR</Link>
+        <Link to="/homepage" className="nav-item">HOME</Link>
+        <Link to="/browse" className="nav-item">BROWSE ROOMS</Link>
+
+        <div className="manage-dropdown">
+          <span className="manage-label">MANAGE ▾</span>
+          <div className="manage-options">
+            <Link to={currentUser?.username === "admin" ? "/admin" : "/upcoming"}>Manage Rooms</Link>
+            {currentUser?.username === "admin" && (
+              <Link to="/usermanagement">Manage Users</Link>
+            )}
+          </div>
+        </div>
+
+        <Link to="/bookingmanagement" className="nav-item">CALENDAR</Link>
       </nav>
+
       <div className="user-menu" ref={dropdownRef}>
         <button className="dropdown-toggle" onClick={toggleDropdown}>
           <FaBars className="menu-icon" />
@@ -57,7 +66,6 @@ export const Header = () => {
         </button>
         {isDropdownOpen && (
           <div className="dropdown-content">
-            {/* [NEW] Show username if logged in */}
             {currentUser && (
               <div className="user-info">
                 Logged in as: {currentUser.username}

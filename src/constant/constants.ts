@@ -1,4 +1,3 @@
-// ROUTER PATH
 export const PATHS = {
   MAIN: {
     path: "/",
@@ -55,19 +54,10 @@ export const PATHS = {
   ANALYTICS: {
     path: "/analytics",
     label: "Analytics",
-  }
-  // Add more routes here
-};
-
-// SIDE BAR MENU PATH
-export const SIDE_BAR_MENU = [
-  {
-    path: "/dashboard",
-    label: "Dashboard"
   },
-  {
-    path: "/logout",
-    label: "Logout"
-  }
-  // Add more path here
-];
+  USER_MANAGEMENT: {
+    path: "/usermanagement",
+    label: "User Management",
+  },  
+  // <-- added here
+};
