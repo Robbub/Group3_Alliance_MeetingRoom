@@ -1,9 +1,9 @@
 // ROUTER PATH
 export const PATHS = {
-  MAIN: {
-    path: "/",
-    label: "Not Found"
-  },
+  // MAIN: {
+  //   path: "/",
+  //   label: "Not Found"
+  // },
   LOGIN: {
     path: "/login",
     label: "Login"
@@ -25,7 +25,7 @@ export const PATHS = {
     label: "Register",
   },
   HOMEPAGE: {
-    path: "/homepage",
+    path: "/",
     label: "Homepage",
   },
   UPCOMING: {

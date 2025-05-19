@@ -38,7 +38,7 @@ export const Header = () => {
   return (
     <header className="header">
       <div className="logo">
-        <a href="/homepage">
+        <a href="/">
           <img src="/assets/summit-logo.png" alt="SUMMITFLOW" />
         </a>
       </div>
@@ -56,7 +56,7 @@ export const Header = () => {
         </button>
         {isDropdownOpen && (
           <div className="dropdown-content">
-            {/* [NEW] Show username if logged in */}
+            {/* show username if logged in */}
             {currentUser && (
               <div className="user-info">
                 Logged in as: {currentUser.username}

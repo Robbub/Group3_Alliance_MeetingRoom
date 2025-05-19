@@ -90,12 +90,22 @@ body {
   position: fixed;
   top: 0;
   left: 0;
+<<<<<<< Updated upstream
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+=======
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+>>>>>>> Stashed changes
 }
 
 .modal-content {
@@ -172,6 +182,7 @@ body {
   justify-content: center;
 }
 
+<<<<<<< Updated upstream
 .book-button {
   background-color: #64442F;
   color: white;
@@ -182,6 +193,18 @@ body {
   margin-top: auto;
   font-weight: bold;
   width: 100%; 
+=======
+.modal-arrow:hover {
+  background-color: #f2d7c3;
+}
+
+.modal-arrow-left {
+  left: 590px;
+}
+
+.modal-arrow-right {
+  right: 590px;
+>>>>>>> Stashed changes
 }
 
 .close {

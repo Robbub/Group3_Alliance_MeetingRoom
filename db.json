@@ -19,10 +19,27 @@
       "username": "jack",
       "password": "password"
     },
+<<<<<<< Updated upstream
     { 
       "username": "admin",
       "password": "admin",
       "role": "admin"
+=======
+    {
+      "id": 2077,
+      "username": "user",
+      "password": "user"
+    },
+    {
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
+    },
+    {
+      "id": "9322",
+      "username": "harvy",
+      "password": "harvy"
+>>>>>>> Stashed changes
     }
   ]
 }
