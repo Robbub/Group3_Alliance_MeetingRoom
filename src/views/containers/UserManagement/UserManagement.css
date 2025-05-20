@@ -80,7 +80,7 @@
 }
 
 .user-table th {
-  background-color: #f7eee4;
+  background-color: #E6CCB2;
   color: #5e3d2c;
   font-weight: 600;
   font-size: 14px;
@@ -176,3 +176,85 @@
   background-color: #d8d2cb;
 }
 
+.role-cell {
+  position: relative;
+  cursor: pointer;
+}
+
+.role-display {
+  position: relative;
+  display: inline-block;
+}
+
+.role-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fffaf5;
+  border: 1px solid #e1c5a5;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  min-width: 120px;
+}
+
+.role-option {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #5e3d2c;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.role-option:hover {
+  background-color: #f2e4d9;
+}
+
+.role-cell {
+  position: relative;
+}
+
+.role-display {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.dropdown-icon {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.role-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  border: 1px solid #e1c5a5;
+  border-radius: 8px;
+  margin-top: 6px;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  min-width: 120px;
+}
+
+.role-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.role-option:hover {
+  background-color: #f7eee4;
+}
+
+.empty-row td {
+  height: 30px; /* Match the height of normal rows */
+  padding: 12px; /* Match your table's td padding */
+}
