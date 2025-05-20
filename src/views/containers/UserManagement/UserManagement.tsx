@@ -3,6 +3,8 @@ import { FaChevronUp, FaChevronDown, FaTrashAlt, FaWrench } from "react-icons/fa
 import { Header } from "../../../views/components/Header/Header";
 import "./UserManagement.css";
 
+type Role = "Admin" | "Super Admin" | "Member";
+
 interface User {
   id: number;
   email: string;
@@ -10,6 +12,28 @@ interface User {
   name: string;
   role: string;
 }
+
+interface LoggedUser {
+  id?: number | string;
+  username: string;
+  password: string;
+  role?: string;
+}
+
+const loginUsername = "superadmin"; // Change to "admin" to simulate Admin login
+
+const loginUsers: LoggedUser[] = [
+  {
+    username: "admin",
+    password: "admin",
+    role: "admin",
+  },
+  {
+    username: "superadmin",
+    password: "superadmin",
+    role: "super admin",
+  },
+];
 
 const initialUsers: User[] = [
   { id: 1, email: "sophia.lane@example.com", lastSeen: "05-11-2025 | 3:45 PM", name: "Sophia Lane", role: "Admin" },
@@ -25,10 +49,30 @@ const initialUsers: User[] = [
   { id: 11, email: "mia.carter@example.com", lastSeen: "05-09-2025 | 5:00 PM", name: "Mia Carter", role: "Super Admin" },
 ];
 
+const USERS_PER_PAGE = 11;
+
 type SortKey = keyof User;
 type SortDirection = "asc" | "desc";
 
-const USERS_PER_PAGE = 11;
+const fetchCurrentUserRole = (): Promise<Role | null> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const storedUser = localStorage.getItem("user"); // or "loggedInUser" if you use that key
+      if (!storedUser) return resolve(null);
+
+      try {
+        const user = JSON.parse(storedUser);
+        const roleLower = user.role?.toLowerCase();
+        if (roleLower === "admin") resolve("Admin");
+        else if (roleLower === "super admin") resolve("Super Admin");
+        else resolve("Member");
+      } catch {
+        resolve(null);
+      }
+    }, 500);
+  });
+};
+
 
 const UserManagementPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
@@ -37,6 +81,14 @@ const UserManagementPage: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [hoveredUserId, setHoveredUserId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentUserRole, setCurrentUserRole] = useState<Role>("Member");
+
+ useEffect(() => {
+  fetchCurrentUserRole().then((role) => {
+    if (role) setCurrentUserRole(role);
+  });
+}, []);
+
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -64,13 +116,10 @@ const UserManagementPage: React.FC = () => {
 
   const paginatedUsers = useMemo(() => {
     const start = (currentPage - 1) * USERS_PER_PAGE;
-    const pageUsers = filteredUsers.slice(start, start + USERS_PER_PAGE);
-
-    // Fill with empty users to maintain 11 rows
+    const pageUsers = [...filteredUsers.slice(start, start + USERS_PER_PAGE)];
     while (pageUsers.length < USERS_PER_PAGE) {
       pageUsers.push({ id: -1, email: "", lastSeen: "", name: "", role: "" });
     }
-
     return pageUsers;
   }, [filteredUsers, currentPage]);
 
@@ -119,7 +168,9 @@ const UserManagementPage: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button className="add-user-btn">Add New User</button>
+            <button className="add-user-btn" disabled={currentUserRole !== "Super Admin"}>
+              Add New User
+            </button>
           </div>
         </div>
 
@@ -128,113 +179,81 @@ const UserManagementPage: React.FC = () => {
             <thead>
               <tr>
                 <th></th>
-                <th onClick={() => handleSort("email")}>
-                  Username / Email {sortKey === "email" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
-                <th onClick={() => handleSort("lastSeen")}>
-                  Last Seen {sortKey === "lastSeen" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
-                <th onClick={() => handleSort("name")}>
-                  Name {sortKey === "name" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
-                <th onClick={() => handleSort("role")}>
-                  Role {sortKey === "role" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
+                <th onClick={() => handleSort("email")}>Email {sortKey === "email" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}</th>
+                <th onClick={() => handleSort("lastSeen")}>Last Seen {sortKey === "lastSeen" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}</th>
+                <th onClick={() => handleSort("name")}>Name {sortKey === "name" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}</th>
+                <th onClick={() => handleSort("role")}>Role {sortKey === "role" && (sortDirection === "asc" ? <FaChevronUp /> : <FaChevronDown />)}</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-            {paginatedUsers.map((user: User, index: number) => (
-              <tr key={index} className={user.id === -1 ? "empty-row" : ""}>
-                <td>
-                  {user.id !== -1 ? (
-                    <div className="checkbox-avatar">
-                      <input type="checkbox" />
-                      <span className="avatar-placeholder" />
-                    </div>
-                  ) : null}
-                </td>
-                <td>{user.id !== -1 ? user.email : ""}</td>
-                <td>{user.id !== -1 ? user.lastSeen : ""}</td>
-                <td>{user.id !== -1 ? user.name : ""}</td>
-                <td className="role-cell">
-                  {user.id !== -1 ? (
-                    <div
-                      className="role-display"
-                      onClick={() =>
-                        setHoveredUserId(hoveredUserId === user.id ? null : user.id)
-                      }
-                    >
-                      {user.role}
-                      <span
-                        className={`dropdown-icon ${
-                          hoveredUserId === user.id ? "open" : ""
-                        }`}
-                      >
-                        <FaChevronDown />
-                      </span>
-                      {hoveredUserId === user.id && (
-                        <div className="role-dropdown">
-                          {["Member", "Admin", "Super Admin"].map((role) => (
-                            <div
-                              key={role}
-                              className="role-option"
-                              onClick={() => {
-                                updateUserRole(user.id, role);
-                                setHoveredUserId(null);
-                              }}
-                            >
-                              {role}
-                            </div>
-                          ))}
+              {paginatedUsers.map((user) => {
+                const isSuperAdminUser = user.role === "Super Admin";
+                const canEditOrDelete = currentUserRole === "Super Admin" || (currentUserRole === "Admin" && !isSuperAdminUser);
+                const canChangeRole = canEditOrDelete;
+                const showCheckbox = user.id !== -1 && canEditOrDelete;
+                const showAvatar = user.id !== -1;
+
+                return (
+                  <tr key={user.id} className={user.id === -1 ? "empty-row" : ""}>
+                    <td>
+                      {user.id !== -1 && (
+                        <div className="checkbox-avatar">
+                          {showCheckbox ? <input type="checkbox" /> : <span style={{ width: 18, display: "inline-block" }} />}
+                          {showAvatar && <span className="avatar-placeholder" />}
                         </div>
                       )}
-                    </div>
-                  ) : null}
-                </td>
-                <td>
-                  {user.id !== -1 ? (
-                    <>
-                      <button className="action-btn">
-                        <FaWrench />
-                      </button>
-                      <button
-                        className="action-btn delete"
-                        onClick={() => handleDelete(user.id)}
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
-          </tbody>
+                    </td>
+                    <td>{user.email}</td>
+                    <td>{user.lastSeen}</td>
+                    <td>{user.name}</td>
+                    <td className="role-cell">
+                      {user.id !== -1 && canChangeRole ? (
+                        <div className="role-display" onClick={() => setHoveredUserId(hoveredUserId === user.id ? null : user.id)}>
+                          {user.role}
+                          <span className={`dropdown-icon ${hoveredUserId === user.id ? "open" : ""}`}>
+                            <FaChevronDown />
+                          </span>
+                          {hoveredUserId === user.id && (
+                            <div className="role-dropdown">
+                              {["Member", "Admin", "Super Admin"].map((role) => (
+                                <div key={role} className="role-option" onClick={() => { updateUserRole(user.id, role); setHoveredUserId(null); }}>
+                                  {role}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="role-display no-dropdown">{user.role}</div>
+                      )}
+                    </td>
+                    <td>
+  {user.id !== -1 && canEditOrDelete && (
+    <>
+      <button className="action-btn"><FaWrench /></button>
+      <button className="action-btn delete" onClick={() => handleDelete(user.id)}><FaTrashAlt /></button>
+    </>
+  )}
+</td>
+
+                  </tr>
+                );
+              })}
+            </tbody>
           </table>
         </div>
 
         <div className="pagination">
-          <button
-            className="pagination-btn"
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            disabled={currentPage === 1}
-          >
+          <button className="pagination-btn" onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))} disabled={currentPage === 1}>
             &larr;
           </button>
           {Array.from({ length: totalPages }, (_, i) => (
-            <span
-              key={i}
-              className={`page-number ${currentPage === i + 1 ? "active" : ""}`}
-              onClick={() => setCurrentPage(i + 1)}
-            >
+            <span key={i} className={`page-number ${currentPage === i + 1 ? "active" : ""}`} onClick={() => setCurrentPage(i + 1)}>
               {i + 1}
             </span>
           ))}
-          <button
-            className="pagination-btn"
-            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-            disabled={currentPage === totalPages}
-          >
+          <button className="pagination-btn" onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))} disabled={currentPage === totalPages}>
             &rarr;
           </button>
         </div>
