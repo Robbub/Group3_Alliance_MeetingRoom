@@ -38,14 +38,70 @@
       "id": "3b4f"
     },
     {
-        "id": 2077,
-        "username": "user",
-        "password": "user"
+      "id": 2077,
+      "username": "user",
+      "password": "user"
     },
     {
-        "username": "admin",
-        "password": "admin",
-        "role": "admin"
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "259d",
+      "floor": "17th Floor",
+      "roomName": "Room 1",
+      "date": "0025-09-09",
+      "startTime": "10:00",
+      "endTime": "12:20",
+      "recurring": false,
+      "purpose": "asd",
+      "participantInput": "harvy",
+      "participants": [],
+      "frequency": "",
+      "recurringStartDate": "",
+      "recurringEndDate": "",
+      "daysOfWeek": [],
+      "roomId": 1,
+      "createdAt": "2025-05-23T08:09:04.549Z"
+    },
+    {
+      "id": "3e20",
+      "floor": "17th Floor",
+      "roomName": "Room 1",
+      "date": "0003-03-09",
+      "startTime": "14:09",
+      "endTime": "02:09",
+      "recurring": false,
+      "purpose": "os",
+      "participantInput": "w",
+      "participants": [],
+      "frequency": "",
+      "recurringStartDate": "",
+      "recurringEndDate": "",
+      "daysOfWeek": [],
+      "roomId": 1,
+      "createdAt": "2025-05-23T08:15:54.795Z"
+    },
+    {
+      "id": "19f5",
+      "floor": "17th Floor",
+      "roomName": "Room 8",
+      "date": "75484-09-06",
+      "startTime": "20:07",
+      "endTime": "04:23",
+      "recurring": false,
+      "purpose": "monico",
+      "participantInput": "NICONICS",
+      "participants": [],
+      "frequency": "",
+      "recurringStartDate": "",
+      "recurringEndDate": "",
+      "daysOfWeek": [],
+      "roomId": 8,
+      "createdAt": "2025-05-23T08:26:39.897Z"
     }
   ]
 }
