@@ -13,6 +13,7 @@ interface Room {
   amenities: string[];
   capacity: number;
   coverPhoto: string;
+  available: boolean;
 }
 
 interface AddRoomModalProps {
@@ -32,6 +33,7 @@ export const RoomManagement: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [roomsPerPage] = useState(5);
+  
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -267,6 +269,7 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
           show={showAddModal}
           onHide={() => setShowAddModal(false)}
           onSave={handleAddRoom}
+          existingRooms={rooms}
         />
 
         {currentRoom && (
@@ -290,6 +293,7 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
             keyboard={false}
             aria-labelledby="contained-modal-title-vcenter"
             centered
+            dialogClassName="modal-dialog-centered"
           >
             <Modal.Header closeButton>
               <Modal.Title>Confirm Deletion</Modal.Title>

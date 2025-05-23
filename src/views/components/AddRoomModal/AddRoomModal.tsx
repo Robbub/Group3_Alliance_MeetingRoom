@@ -5,7 +5,8 @@ import './AddRoomModal.css'; // Make sure to create this CSS file
 interface AddRoomModalProps {
   show: boolean;
   onHide: () => void;
-  onSave: (room: Omit<Room, 'id'>) => void;
+  onSave: (room: Room) => void;
+  existingRooms: Room[]; 
 }
 
 interface Room {
@@ -15,9 +16,10 @@ interface Room {
   amenities: string[];
   capacity: number;
   coverPhoto: string;
+  available: boolean;
 }
 
-const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave }) => {
+const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, existingRooms }) => {
   const [roomName, setRoomName] = useState('');
   const [floorNumber, setFloorNumber] = useState('1');
   const [capacity, setCapacity] = useState('1');
@@ -38,16 +40,28 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave }) => 
     setAmenities(amenities.filter(a => a !== amenity));
   };
 
-  const handleSave = () => {
+ const handleSave = () => {
+    // Calculate next ID
+    const maxId = existingRooms.reduce(
+      (max, room) => Math.max(max, room.id), 
+      0
+    );
+    const newId = maxId + 1;
+
     onSave({
+      id: newId, // Auto-incremented ID
       roomName,
       floorNumber,
       capacity: parseInt(capacity),
       amenities,
-      coverPhoto: coverPhotoFile?.name || ''
+      coverPhoto: coverPhotoFile?.name || '',
+      available: true
     });
     onHide();
   };
+
+
+
 
   const floorOptions = Array.from({ length: 17 }, (_, i) => (i + 1).toString());
   const capacityOptions = Array.from({ length: 50 }, (_, i) => (i + 1).toString());

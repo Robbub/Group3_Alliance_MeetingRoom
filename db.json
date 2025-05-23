@@ -51,40 +51,15 @@
   ],
   "rooms": [
     {
-      "id": "RM-102-MONACO",
-      "roomName": "Monaco",
-      "floorNumber": 1,
-      "capacity": 8,
-      "amenities": [
-        "Whiteboard",
-        "Projector",
-        "Wi-Fi",
-        "Conference Phone"
-      ],
-      "coverPhoto": "/images/monaco.jpg",
-      "available": true
-    },
-    {
-      "id": null,
-      "roomName": "The Langston",
-      "floorNumber": "6",
-      "capacity": 8,
-      "amenities": [
-        "amenity 1",
-        "amenity 2"
-      ],
-      "coverPhoto": ""
-    },
-    {
-      "id": null,
+      "id": 1,
       "roomName": "Linear",
       "floorNumber": "14",
-      "capacity": 14,
+      "capacity": 9,
       "amenities": [
-        "whiteboard",
-        "wifi"
+        "whiteboard"
       ],
-      "coverPhoto": ""
+      "coverPhoto": "",
+      "available": true
     }
   ]
 }
