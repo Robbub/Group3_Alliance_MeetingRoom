@@ -40,9 +40,13 @@ export const PATHS = {
     path: "/browse",
     label: "Browse",
   },
-  ADMIN: {
-    path: "/admin",
-    label: "Admin",
+  ROOMMANAGEMENT: {
+    path: "/room-management",
+    label: "Manage Rooms",
+  },
+  USERMANAGEMENT: {
+    path: "/user-management",
+    label: "Manage Users",
   }
   // Add more routes here
 };

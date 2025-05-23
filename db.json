@@ -16,46 +16,42 @@
   ],
   "users": [
     {
+      "id": 1,
       "username": "jack",
-      "password": "password"
+      "password": "password",
+      "role": "user"
     },
-<<<<<<< Updated upstream
     { 
+      "id": 2,
       "username": "admin",
       "password": "admin",
       "role": "admin"
-=======
+    },
     {
       "id": 2077,
       "username": "user",
-      "password": "user"
+      "password": "user",
+      "role": "user"
+    }
+  ],
+  "rooms": [
+    {
+      "roomId": "RM-101-DENVER",
+      "name": "Denver",
+      "floor": 1,
+      "capacity": 6,
+      "amenities": ["Whiteboard", "Wi-Fi", "TV Screen"],
+      "coverPhoto": "/images/denver.jpg",
+      "available": true
     },
     {
-<<<<<<< Updated upstream
-      "username": "admin",
-      "password": "admin",
-      "role": "admin"
-    },
-    {
-      "id": "9322",
-      "username": "harvy",
-      "password": "harvy"
->>>>>>> Stashed changes
-=======
-      "id": 2077,
-      "username": "user",
-      "password": "user"
-    },
-    {
-      "username": "admin",
-      "password": "admin",
-      "role": "admin"
-    },
-    {
-      "id": "9322",
-      "username": "harvy",
-      "password": "harvy"
->>>>>>> Stashed changes
+      "roomId": "RM-102-MONACO",
+      "name": "Monaco",
+      "floor": 1,
+      "capacity": 8,
+      "amenities": ["Whiteboard", "Projector", "Wi-Fi", "Conference Phone"],
+      "coverPhoto": "/images/monaco.jpg",
+      "available": true
     }
   ]
-}
+}  
