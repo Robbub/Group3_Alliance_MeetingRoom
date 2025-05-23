@@ -8,11 +8,26 @@
     }
   ],
   "participants": [
-    { "id": 1, "name": "John Doe" },
-    { "id": 2, "name": "Jane Smith" },
-    { "id": 3, "name": "Alice Johnson" },
-    { "id": 4, "name": "Bob Brown" },
-    { "id": 5, "name": "Charlie Davis" }
+    {
+      "id": 1,
+      "name": "John Doe"
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith"
+    },
+    {
+      "id": 3,
+      "name": "Alice Johnson"
+    },
+    {
+      "id": 4,
+      "name": "Bob Brown"
+    },
+    {
+      "id": 5,
+      "name": "Charlie Davis"
+    }
   ],
   "users": [
     {
@@ -21,7 +36,7 @@
       "password": "password",
       "role": "user"
     },
-    { 
+    {
       "id": 2,
       "username": "admin",
       "password": "admin",
@@ -36,22 +51,40 @@
   ],
   "rooms": [
     {
-      "roomId": "RM-101-DENVER",
-      "name": "Denver",
-      "floor": 1,
-      "capacity": 6,
-      "amenities": ["Whiteboard", "Wi-Fi", "TV Screen"],
-      "coverPhoto": "/images/denver.jpg",
+      "id": "RM-102-MONACO",
+      "roomName": "Monaco",
+      "floorNumber": 1,
+      "capacity": 8,
+      "amenities": [
+        "Whiteboard",
+        "Projector",
+        "Wi-Fi",
+        "Conference Phone"
+      ],
+      "coverPhoto": "/images/monaco.jpg",
       "available": true
     },
     {
-      "roomId": "RM-102-MONACO",
-      "name": "Monaco",
-      "floor": 1,
+      "id": null,
+      "roomName": "The Langston",
+      "floorNumber": "6",
       "capacity": 8,
-      "amenities": ["Whiteboard", "Projector", "Wi-Fi", "Conference Phone"],
-      "coverPhoto": "/images/monaco.jpg",
-      "available": true
+      "amenities": [
+        "amenity 1",
+        "amenity 2"
+      ],
+      "coverPhoto": ""
+    },
+    {
+      "id": null,
+      "roomName": "Linear",
+      "floorNumber": "14",
+      "capacity": 14,
+      "amenities": [
+        "whiteboard",
+        "wifi"
+      ],
+      "coverPhoto": ""
     }
   ]
-}  
+}

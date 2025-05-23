@@ -54,10 +54,10 @@ export const AppRoutes = () => {
           }
         />
         <Route
-          path={PATHS.ADMIN.path}
+          path={PATHS.ROOM_MANAGEMENT.path}
           element={
             <ProtectedRoute>
-              <Views.Admin />
+              <Views.RoomManagement />
             </ProtectedRoute>
           }
         />
