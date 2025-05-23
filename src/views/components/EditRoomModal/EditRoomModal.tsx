@@ -20,8 +20,12 @@ interface EditRoomModalProps {
 }
 
 const EditRoomModal: React.FC<EditRoomModalProps> = ({ show, onHide, room, onSave }) => {
-  const [editedRoom, setEditedRoom] = useState<Room>({ ...room });
+  const [editedRoom, setEditedRoom] = useState<Room>({ ...room,
+floorNumber: room.floorNumber.toString(), 
+capacity: room.capacity 
+   });
   const [tempAmenity, setTempAmenity] = useState('');
+  const [coverPhotoPreview, setCoverPhotoPreview] = useState(room.coverPhoto);
   const [coverPhotoFile, setCoverPhotoFile] = useState<File | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,20 +73,23 @@ const EditRoomModal: React.FC<EditRoomModalProps> = ({ show, onHide, room, onSav
     }
   };
 
-  const handleSave = () => {
-    const updatedRoom = {
-      ...room,
-      ...editedRoom, 
-      id: room.id, 
-      coverPhoto: coverPhotoFile 
-        ? URL.createObjectURL(coverPhotoFile) 
-        : editedRoom.coverPhoto, 
-    };
-    
-    onSave(updatedRoom);
-    onHide();
+const handleSave = () => {
+  
+  const finalCoverPhoto = editedRoom.coverPhoto || room.coverPhoto;
+  
+  const updatedRoom: Room = {
+    ...room,       
+    ...editedRoom,  
+    id: room.id,
+    floorNumber: editedRoom.floorNumber,
+    amenities: editedRoom.amenities,
+    coverPhoto: finalCoverPhoto,
+    capacity: Number(editedRoom.capacity) 
   };
 
+  onSave(updatedRoom);
+  onHide();
+};
 
 
   const floorOptions = Array.from({ length: 17 }, (_, i) => (i + 1).toString());
