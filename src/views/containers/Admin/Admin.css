@@ -11,6 +11,16 @@
   align-items: center; 
 }
 
+.sticky-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+  background-color: #fffaf5;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
 .heading {
   display: flex; 
   flex-direction: row;

@@ -1,20 +1,38 @@
 import React, { useState } from "react";
 import { Header } from "../../../views/components/Header/Header";
+import BookingModal from "../../../views/components/BookingModal/BookingModal";
 import "./Browse.css";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+type Room = {
+  id: number;
+  name: string;
+  floor: string;
+  image: string;
+  amenities: string[];
+  capacity: number;
+};
 
 export const Browse = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
 
-  const rooms = Array.from({ length: 100 }, (_, index) => ({
+  const rooms: Room[] = Array.from({ length: 100 }, (_, index) => ({
     id: index + 1,
     name: `Room ${index + 1}`,
     floor: "17th Floor",
     image: "/assets/meeting-room2.jpg",
-    amenities: ["Smart Boards", "Projection Screens", "Built-in TVs", "Speakers", "Boardroom table with power outlets"],
+    amenities: [
+      "Smart Boards",
+      "Projection Screens",
+      "Built-in TVs",
+      "Speakers",
+      "Boardroom table with power outlets",
+    ],
     capacity: 12,
   }));
 
@@ -32,7 +50,7 @@ export const Browse = () => {
     currentPage * roomsPerPage
   );
 
-  const openModal = (room) => {
+  const openModal = (room: Room) => {
     setSelectedRoom(room);
     setIsModalOpen(true);
   };
@@ -42,10 +60,13 @@ export const Browse = () => {
     setSelectedRoom(null);
   };
 
-  const navigateRoom = (direction) => {
+  const navigateRoom = (direction: number) => {
     if (!selectedRoom) return;
 
-    const currentIndex = filteredRooms.findIndex(room => room.id === selectedRoom.id);
+    const currentIndex = filteredRooms.findIndex(
+      (room) => room.id === selectedRoom.id
+    );
+
     let newIndex = currentIndex + direction;
 
     if (newIndex < 0) {
@@ -80,6 +101,7 @@ export const Browse = () => {
           />
           <button>SEARCH</button>
         </div>
+
         <div className="rooms-grid">
           {currentRooms.map((room) => (
             <div
@@ -95,6 +117,7 @@ export const Browse = () => {
             </div>
           ))}
         </div>
+
         <div className="pagination">
           <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>
             &lt;
@@ -113,35 +136,77 @@ export const Browse = () => {
           </button>
         </div>
       </div>
-      {isModalOpen && (
+
+      {isModalOpen && selectedRoom && (
         <div className="modal" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <span className="close" onClick={closeModal}>
-              &times;
-            </span>
-            {selectedRoom && (
-              <>
-                <img src={selectedRoom.image} alt={selectedRoom.name} className="modal-image" />
-                <div className="modal-details">
-                  <h2>BOARDROOM {selectedRoom.id}</h2>
-                  <p>FLOOR: {selectedRoom.floor}</p>
-                  <p>AMENITIES:</p>
-                  <ul>
-                    {selectedRoom.amenities.map((amenity, index) => (
-                      <li key={index}>{amenity}</li>
-                    ))}
-                  </ul>
-                  <p>Capacity: {selectedRoom.capacity}</p>
-                  <div className="modal-navigation">
-                    <button onClick={() => navigateRoom(-1)}>&lt;</button>
-                    <button onClick={() => navigateRoom(1)}>&gt;</button>
-                  </div>
-                  <button className="book-button" onClick={closeModal}>BOOK</button>
-                </div>
-              </>
-            )}
+          <div className="modal-wrapper">
+            <button
+              className="modal-arrow modal-arrow-left"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateRoom(-1);
+              }}
+            >
+              <FaChevronLeft />
+            </button>
+
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <span className="close" onClick={closeModal}>
+                &times;
+              </span>
+
+              <img
+                src={selectedRoom.image}
+                alt={selectedRoom.name}
+                className="modal-image"
+              />
+
+              <div className="modal-details">
+                <h2>{selectedRoom.name.toUpperCase()}</h2>
+                <p><strong>FLOOR:</strong> {selectedRoom.floor}</p>
+                <p><strong>AMENITIES:</strong></p>
+                <ul>
+                  {selectedRoom.amenities.map((amenity, index) => (
+                    <li key={index}>{amenity}</li>
+                  ))}
+                </ul>
+                <p><strong>Capacity:</strong> {selectedRoom.capacity}</p>
+
+                <button
+                  className="book-button"
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setShowBookingModal(true);
+                  }}
+                >
+                  BOOK
+                </button>
+              </div>
+            </div>
+
+            <button
+              className="modal-arrow modal-arrow-right"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigateRoom(1);
+              }}
+            >
+              <FaChevronRight />
+            </button>
           </div>
         </div>
+      )}
+
+      {showBookingModal && selectedRoom && (
+        <BookingModal
+          room={selectedRoom}
+          onClose={(goBack) => {
+            setShowBookingModal(false);
+            if (goBack) {
+              setIsModalOpen(true); // return to preview modal
+            }
+          }}
+        />
       )}
     </>
   );
