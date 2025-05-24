@@ -4,6 +4,8 @@ import { Header } from "../../../views/components/Header/Header";
 import "./UserManagement.css";
 import AddUserModal from "./AddUserModal";
 import MassActionModal from "./MassActionModal";
+import EditUserModal from "./UserEditModal";
+
 
 type Role = "Admin" | "Super Admin" | "Member";
 
@@ -69,6 +71,8 @@ const UserManagementPage: React.FC = () => {
   const [currentUserRole, setCurrentUserRole] = useState<Role>("Member");
   const [showModal, setShowModal] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
 
 
   useEffect(() => {
@@ -169,7 +173,7 @@ const UserManagementPage: React.FC = () => {
             />
             <button
               className="add-user-btn"
-              disabled={currentUserRole !== "Super Admin"}
+              disabled={!(currentUserRole === "Super Admin" || currentUserRole === "Admin")}
               onClick={() => setShowModal(true)}
             >
               Add New User
@@ -254,7 +258,12 @@ const UserManagementPage: React.FC = () => {
                     <td>
                       {user.id !== -1 && canEditOrDelete && (
                         <>
-                          <button className="action-btn"><FaWrench /></button>
+                          <button
+                            className="action-btn"
+                            onClick={() => setEditingUser(user)}
+                          >
+                            <FaWrench />
+                          </button>
                           <button className="action-btn delete" onClick={() => handleDelete(user.id)}><FaTrashAlt /></button>
                         </>
                       )}
@@ -303,6 +312,19 @@ const UserManagementPage: React.FC = () => {
           onCancel={() => setSelectedUserIds([])}
         />
       )}
+
+      {editingUser && (
+      <EditUserModal
+        user={editingUser}
+        onClose={() => setEditingUser(null)}
+        onSave={(updatedUser) => {
+          setUsers((prev) =>
+            prev.map((user) => (user.id === updatedUser.id ? { ...user, ...updatedUser } : user))
+          );
+          setEditingUser(null);
+        }}
+      />
+    )}
     </div>
   );
 };

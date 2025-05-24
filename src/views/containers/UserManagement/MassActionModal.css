@@ -1,10 +1,10 @@
 .mass-action-modal {
   position: fixed;
-  bottom: 1.5rem; /* space from bottom */
+  bottom: 1.5rem; 
   left: 50%;
   transform: translateX(-50%);
-  background-color: #eacfb3; /* soft beige tone like the image */
-  border-radius: 999px; /* fully rounded pill shape */
+  background-color: #eacfb3; 
+  border-radius: 999px;
   padding: 0.75rem 2rem;
   display: flex;
   justify-content: center;
@@ -12,7 +12,7 @@
   gap: 1rem;
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  max-width: 90%; /* avoid touching screen edges */
+  max-width: 90%; 
 }
 
 .mass-role-dropdown {
