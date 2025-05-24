@@ -49,6 +49,15 @@
       "username": "user",
       "password": "user",
       "role": "user"
+        "username": "admin",
+        "password": "admin",
+        "role": "admin"
+    },
+    
+    {
+        "username": "superadmin",
+        "password": "superadmin",
+        "role": "super admin"
     }
   ],
   "rooms": []

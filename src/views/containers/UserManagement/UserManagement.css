@@ -1,0 +1,260 @@
+.user-management-page {
+  font-family: 'Poppins', sans-serif;
+  background-color: #fffaf5;
+  color: #5e3d2c;
+  margin-bottom: 0;
+}
+
+.sticky-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+  background-color: #fffaf5;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-management-content {
+  max-width: 2200px;
+  margin: 30px auto 0px auto;
+  padding: 0 75px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.user-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.manage-users-heading {
+  font-size: 38px;
+  font-weight: 1000;
+  color: #5c3b22; /* Brown like the image */
+  margin: 0;
+}
+
+.search-and-add {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.search-input {
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 2px solid #e1c5a5;
+  background-color: #fef8f2;
+  color: #5c3b22;
+  width: 300px;
+}
+
+.add-user-btn {
+  padding: 10px 16px;
+  background-color: #5c3b22;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th,
+.user-table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #f2e4d9;
+}
+
+.user-table th {
+  background-color: #E6CCB2;
+  color: #5e3d2c;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: left;
+}
+
+.user-table td {
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.user-table td:first-child,
+.user-table th:first-child {
+  width: 40px;
+}
+
+.user-table td:nth-child(2) {
+  color: #3d3d3d;
+  font-weight: 500;
+}
+
+.user-table td:last-child {
+  text-align: left; /* or left if preferred */
+  width: 150px;   
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 20px;
+  font-size: 16px;
+}
+
+.action-btn.delete {
+  color: red;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  gap: 8px;
+}
+
+.pagination-btn,
+.page-number {
+  padding: 6px 10px;
+  background-color: #f7eee4;
+  color: #5e3d2c;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.page-number.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .user-management-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .user-table th,
+  .user-table td {
+    font-size: 13px;
+    padding: 10px;
+  }
+}
+
+.checkbox-avatar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar-placeholder {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  border-radius: 50%;
+  background-color: #d8d2cb;
+}
+
+.role-cell {
+  position: relative;
+  cursor: pointer;
+}
+
+.role-display {
+  position: relative;
+  display: inline-block;
+}
+
+.role-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fffaf5;
+  border: 1px solid #e1c5a5;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  min-width: 120px;
+}
+
+.role-option {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #5e3d2c;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.role-option:hover {
+  background-color: #f2e4d9;
+}
+
+.role-cell {
+  position: relative;
+}
+
+.role-display {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.dropdown-icon {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.role-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #fff;
+  border: 1px solid #e1c5a5;
+  border-radius: 8px;
+  margin-top: 6px;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  min-width: 120px;
+}
+
+.role-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.role-option:hover {
+  background-color: #f7eee4;
+}
+
+.empty-row td {
+  height: 30px; /* Match the height of normal rows */
+  padding: 12px; /* Match your table's td padding */
+}
