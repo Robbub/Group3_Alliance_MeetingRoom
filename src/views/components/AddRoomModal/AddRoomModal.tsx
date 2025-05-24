@@ -41,7 +41,7 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
   };
 
  const handleSave = () => {
-    // Calculate next ID
+   
     const maxId = existingRooms.reduce(
       (max, room) => Math.max(max, room.id), 
       0
@@ -49,7 +49,7 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
     const newId = maxId + 1;
 
     onSave({
-      id: newId, // Auto-incremented ID
+      id: newId, 
       roomName,
       floorNumber,
       capacity: parseInt(capacity),

@@ -51,28 +51,5 @@
       "role": "user"
     }
   ],
-  "rooms": [
-    {
-      "id": "1",
-      "roomName": "Linearedirt",
-      "floorNumber": "14",
-      "capacity": 9,
-      "amenities": [
-        "whiteboard"
-      ],
-      "coverPhoto": "",
-      "available": true
-    },
-    {
-      "id": "2",
-      "roomName": "The Hague",
-      "floorNumber": "4",
-      "capacity": 9,
-      "amenities": [
-        "duterte"
-      ],
-      "coverPhoto": "",
-      "available": true
-    }
-  ]
+  "rooms": []
 }

@@ -73,15 +73,15 @@ capacity: room.capacity
   };
 
 const handleSave = () => {
-  // Create the updated room object
+  
   const updatedRoom: Room = {
-    id: room.id,  // Preserve original ID
+    id: room.id,  
     roomName: editedRoom.roomName,
-    floorNumber: editedRoom.floorNumber,  // Already a string
+    floorNumber: editedRoom.floorNumber, 
     capacity: Number(editedRoom.capacity),
     amenities: editedRoom.amenities,
     coverPhoto: editedRoom.coverPhoto || room.coverPhoto,
-    available: room.available  // Preserve availability if not editable
+    available: room.available 
   };
 
   onSave(updatedRoom);

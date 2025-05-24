@@ -88,16 +88,16 @@ const handleEditRoom = async (updatedRoom: Room) => {
     ));
   } catch (error) {
     console.error('Error updating room:', error);
-    // Optionally show error to user
+  
   }
 };
 
 
 const handleDeleteRoom = async () => {
-  if (!currentRoom) return; // Early exit if no room selected
+  if (!currentRoom) return; 
 
   try {
-    // 1. Delete the room directly
+
     const response = await fetch(
       `http://localhost:3000/rooms/${currentRoom.id}`,
       { method: "DELETE" }
@@ -105,13 +105,12 @@ const handleDeleteRoom = async () => {
 
     if (!response.ok) throw new Error("Failed to delete room");
 
-    // 2. Update UI state
+
     setRooms((prevRooms) => 
       prevRooms.filter((room) => room.id !== currentRoom.id)
     );
     setShowDeleteModal(false);
 
-    // Optional: Notify user of success
     alert("Room deleted successfully!");
   } catch (error) {
     console.error("Delete error:", error);
@@ -302,7 +301,7 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
               setCurrentRoom(null);
             }}
             
-            // backdrop="static"
+           
             keyboard={false}
             aria-labelledby="contained-modal-title-vcenter"
             centered
@@ -326,7 +325,7 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
                 Cancel
               </Button>
               <Button 
-                // bootstrap for delete button
+               
                 variant="danger"
                 className="delete-btn"
                 onClick={() => handleDeleteRoom()} 
