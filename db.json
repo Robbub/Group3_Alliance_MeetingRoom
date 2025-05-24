@@ -2,11 +2,11 @@
   "statistics": [
     {
       "report1": "Sample Response 1",
-      "id": "1b3a"
+      "id": "b453"
     },
     {
       "report2": "Sample Response 2",
-      "id": "aa35"
+      "id": "7591"
     }
   ],
   "participants": [
@@ -33,19 +33,23 @@
   ],
   "users": [
     {
+      "id": "1",
       "username": "jack",
       "password": "password",
-      "id": "3b4f"
+      "role": "user"
     },
     {
-        "id": 2077,
-        "username": "user",
-        "password": "user"
+      "id": "2",
+      "username": "admin",
+      "password": "admin",
+      "role": "admin"
     },
     {
-        "username": "admin",
-        "password": "admin",
-        "role": "admin"
+      "id": "2077",
+      "username": "user",
+      "password": "user",
+      "role": "user"
     }
-  ]
+  ],
+  "rooms": []
 }

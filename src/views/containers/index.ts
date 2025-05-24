@@ -16,3 +16,4 @@ export { default as SecuritySettings } from "./Settings/SecuritySettings";
 export { default as NotificationSettings } from "./Settings/NotificationSettings";
 export { default as AppearanceSettings } from "./Settings/AppearanceSettings";
 export * from "./Analytics/Analytics"
+export * from "./RoomManagement/RoomManagement";

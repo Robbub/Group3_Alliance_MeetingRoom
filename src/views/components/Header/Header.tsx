@@ -57,7 +57,7 @@ export const Header = () => {
         </button>
         {isDropdownOpen && (
           <div className="dropdown-content">
-            {/* [NEW] Show username if logged in */}
+            {/* show username if logged in */}
             {currentUser && (
               <div className="user-info">
                 Logged in as: {currentUser.username}
