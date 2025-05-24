@@ -25,7 +25,6 @@ floorNumber: room.floorNumber.toString(),
 capacity: room.capacity 
    });
   const [tempAmenity, setTempAmenity] = useState('');
-  const [coverPhotoPreview, setCoverPhotoPreview] = useState(room.coverPhoto);
   const [coverPhotoFile, setCoverPhotoFile] = useState<File | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,22 +73,21 @@ capacity: room.capacity
   };
 
 const handleSave = () => {
-  
-  const finalCoverPhoto = editedRoom.coverPhoto || room.coverPhoto;
-  
+  // Create the updated room object
   const updatedRoom: Room = {
-    ...room,       
-    ...editedRoom,  
-    id: room.id,
-    floorNumber: editedRoom.floorNumber,
+    id: room.id,  // Preserve original ID
+    roomName: editedRoom.roomName,
+    floorNumber: editedRoom.floorNumber,  // Already a string
+    capacity: Number(editedRoom.capacity),
     amenities: editedRoom.amenities,
-    coverPhoto: finalCoverPhoto,
-    capacity: Number(editedRoom.capacity) 
+    coverPhoto: editedRoom.coverPhoto || room.coverPhoto,
+    available: room.available  // Preserve availability if not editable
   };
 
   onSave(updatedRoom);
   onHide();
 };
+
 
 
   const floorOptions = Array.from({ length: 17 }, (_, i) => (i + 1).toString());

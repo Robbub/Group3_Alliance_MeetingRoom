@@ -66,16 +66,29 @@ export const RoomManagement: React.FC = () => {
 
 const handleEditRoom = async (updatedRoom: Room) => {
   try {
+    console.log('Sending to server:', updatedRoom);  // Debug log
+    
     const response = await fetch(`http://localhost:3000/rooms/${updatedRoom.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedRoom),
     });
-    if (!response.ok) throw new Error('Failed to update room');
-      const data = await response.json();
-      setRooms(rooms.map(room => room.id === data.id ? data : room));
-    } catch (error) {
-      console.error('Error updating room:', error);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update room');
+    }
+    
+    const data = await response.json();
+    console.log('Server response:', data);  // Debug log
+    
+    // for updating local state
+    setRooms(rooms.map(room => 
+      room.id === updatedRoom.id ? updatedRoom : room
+    ));
+  } catch (error) {
+    console.error('Error updating room:', error);
+    // Optionally show error to user
   }
 };
 
