@@ -1,66 +1,24 @@
 {
   "statistics": [
     {
-      "report1": "Sample Response 1",
-      "id": "b453"
+      "report1": "Sample Response 1"
     },
     {
-      "report2": "Sample Response 2",
-      "id": "7591"
+      "report2": "Sample Response 2"
     }
   ],
   "participants": [
-    {
-      "id": "1",
-      "name": "John Doe"
-    },
-    {
-      "id": "2",
-      "name": "Jane Smith"
-    },
-    {
-      "id": "3",
-      "name": "Alice Johnson"
-    },
-    {
-      "id": "4",
-      "name": "Bob Brown"
-    },
-    {
-      "id": "5",
-      "name": "Charlie Davis"
-    }
+    { "id": 1, "name": "John Doe" },
+    { "id": 2, "name": "Jane Smith" },
+    { "id": 3, "name": "Alice Johnson" },
+    { "id": 4, "name": "Bob Brown" },
+    { "id": 5, "name": "Charlie Davis" }
   ],
   "users": [
     {
-      "id": "1",
       "username": "jack",
-      "password": "password",
-      "role": "user"
-    },
-    {
-      "id": "2",
-      "username": "admin",
-      "password": "admin",
-      "role": "admin"
-    },
-    {
-      "id": "2077",
-      "username": "user",
-      "password": "user",
-      "role": "user"
-        "username": "admin",
-        "password": "admin",
-        "role": "admin"
-    },
-    
-    {
-        "username": "superadmin",
-        "password": "superadmin",
-        "role": "super admin"
+      "password": "password"
     }
-  ],
-  "rooms": []
   ],
   "bookingOverTimeData": [
     { "time": "9:00 AM", "bookings": 1 },
