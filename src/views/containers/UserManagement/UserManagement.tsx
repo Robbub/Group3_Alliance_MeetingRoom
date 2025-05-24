@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { FaChevronUp, FaChevronDown, FaTrashAlt, FaWrench } from "react-icons/fa";
 import { Header } from "../../../views/components/Header/Header";
 import "./UserManagement.css";
+import AddUserModal from "./AddUserModal";
+import MassActionModal from "./MassActionModal";
 
 type Role = "Admin" | "Super Admin" | "Member";
 
@@ -19,21 +21,6 @@ interface LoggedUser {
   password: string;
   role?: string;
 }
-
-const loginUsername = "superadmin"; // Change to "admin" to simulate Admin login
-
-const loginUsers: LoggedUser[] = [
-  {
-    username: "admin",
-    password: "admin",
-    role: "admin",
-  },
-  {
-    username: "superadmin",
-    password: "superadmin",
-    role: "super admin",
-  },
-];
 
 const initialUsers: User[] = [
   { id: 1, email: "sophia.lane@example.com", lastSeen: "05-11-2025 | 3:45 PM", name: "Sophia Lane", role: "Admin" },
@@ -57,9 +44,8 @@ type SortDirection = "asc" | "desc";
 const fetchCurrentUserRole = (): Promise<Role | null> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const storedUser = localStorage.getItem("user"); // or "loggedInUser" if you use that key
+      const storedUser = localStorage.getItem("user");
       if (!storedUser) return resolve(null);
-
       try {
         const user = JSON.parse(storedUser);
         const roleLower = user.role?.toLowerCase();
@@ -73,7 +59,6 @@ const fetchCurrentUserRole = (): Promise<Role | null> => {
   });
 };
 
-
 const UserManagementPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [search, setSearch] = useState("");
@@ -82,13 +67,29 @@ const UserManagementPage: React.FC = () => {
   const [hoveredUserId, setHoveredUserId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentUserRole, setCurrentUserRole] = useState<Role>("Member");
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
 
- useEffect(() => {
-  fetchCurrentUserRole().then((role) => {
-    if (role) setCurrentUserRole(role);
-  });
-}, []);
 
+  useEffect(() => {
+    fetchCurrentUserRole().then((role) => {
+      if (role) setCurrentUserRole(role);
+    });
+  }, []);
+
+  const handleAddUser = (newUser: any) => {
+    const fullName = `${newUser.firstName} ${newUser.lastName}`;
+    setUsers((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        email: newUser.email,
+        lastSeen: "Just now",
+        name: fullName,
+        role: newUser.role,
+      },
+    ]);
+  };
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -108,9 +109,7 @@ const UserManagementPage: React.FC = () => {
       .sort((a, b) => {
         const aVal = String(a[sortKey]).toLowerCase();
         const bVal = String(b[sortKey]).toLowerCase();
-        if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
-        return 0;
+        return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       });
   }, [users, search, sortKey, sortDirection]);
 
@@ -168,7 +167,11 @@ const UserManagementPage: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <button className="add-user-btn" disabled={currentUserRole !== "Super Admin"}>
+            <button
+              className="add-user-btn"
+              disabled={currentUserRole !== "Super Admin"}
+              onClick={() => setShowModal(true)}
+            >
               Add New User
             </button>
           </div>
@@ -199,7 +202,18 @@ const UserManagementPage: React.FC = () => {
                     <td>
                       {user.id !== -1 && (
                         <div className="checkbox-avatar">
-                          {showCheckbox ? <input type="checkbox" /> : <span style={{ width: 18, display: "inline-block" }} />}
+                          {showCheckbox ? <input
+                            type="checkbox"
+                            checked={selectedUserIds.includes(user.id)}
+                            onChange={(e) => {
+                              setSelectedUserIds((prev) =>
+                                e.target.checked
+                                  ? [...prev, user.id]
+                                  : prev.filter((uid) => uid !== user.id)
+                              );
+                            }}
+                          />
+                          : <span style={{ width: 18, display: "inline-block" }} />}
                           {showAvatar && <span className="avatar-placeholder" />}
                         </div>
                       )}
@@ -216,10 +230,19 @@ const UserManagementPage: React.FC = () => {
                           </span>
                           {hoveredUserId === user.id && (
                             <div className="role-dropdown">
-                              {["Member", "Admin", "Super Admin"].map((role) => (
-                                <div key={role} className="role-option" onClick={() => { updateUserRole(user.id, role); setHoveredUserId(null); }}>
-                                  {role}
-                                </div>
+                              {["Member", "Admin", "Super Admin"]
+                                .filter((role) => currentUserRole === "Super Admin" || role !== "Super Admin")
+                                .map((role) => (
+                                  <div
+                                    key={role}
+                                    className="role-option"
+                                    onClick={() => {
+                                      updateUserRole(user.id, role);
+                                      setHoveredUserId(null);
+                                    }}
+                                  >
+                                    {role}
+                                  </div>
                               ))}
                             </div>
                           )}
@@ -229,14 +252,13 @@ const UserManagementPage: React.FC = () => {
                       )}
                     </td>
                     <td>
-  {user.id !== -1 && canEditOrDelete && (
-    <>
-      <button className="action-btn"><FaWrench /></button>
-      <button className="action-btn delete" onClick={() => handleDelete(user.id)}><FaTrashAlt /></button>
-    </>
-  )}
-</td>
-
+                      {user.id !== -1 && canEditOrDelete && (
+                        <>
+                          <button className="action-btn"><FaWrench /></button>
+                          <button className="action-btn delete" onClick={() => handleDelete(user.id)}><FaTrashAlt /></button>
+                        </>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
@@ -258,6 +280,29 @@ const UserManagementPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {showModal && (
+        <AddUserModal onClose={() => setShowModal(false)} onAddUser={handleAddUser} />
+      )}
+
+      {selectedUserIds.length > 0 && (
+        <MassActionModal
+          selectedUserIds={selectedUserIds}
+          onChangeRole={(newRole) => {
+            setUsers((prev) =>
+              prev.map((user) =>
+                selectedUserIds.includes(user.id) ? { ...user, role: newRole } : user
+              )
+            );
+            setSelectedUserIds([]);
+          }}
+          onDeleteSelected={() => {
+            setUsers((prev) => prev.filter((user) => !selectedUserIds.includes(user.id)));
+            setSelectedUserIds([]);
+          }}
+          onCancel={() => setSelectedUserIds([])}
+        />
+      )}
     </div>
   );
 };

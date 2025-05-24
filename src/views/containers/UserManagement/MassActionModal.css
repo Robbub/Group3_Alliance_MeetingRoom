@@ -1,0 +1,37 @@
+.mass-action-modal {
+  position: fixed;
+  bottom: 1.5rem; /* space from bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #eacfb3; /* soft beige tone like the image */
+  border-radius: 999px; /* fully rounded pill shape */
+  padding: 0.75rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  max-width: 90%; /* avoid touching screen edges */
+}
+
+.mass-role-dropdown {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.delete-selected-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-selection-btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
