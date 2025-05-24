@@ -1,4 +1,4 @@
-.booking-modal-overlay {
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -148,4 +148,35 @@
 .cancel-btn:hover,
 .book-btn:hover {
   opacity: 0.9;
+}
+
+.recurring-form {
+  background: #f9f6f2;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-top: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.recurring-form .form-row {
+  gap: 16px;
+}
+
+.recurring-form .form-group label {
+  font-weight: 600;
+  color: #4a2e1f;
+  font-size: 14px;
+}
+
+.recurring-form input[type="date"],
+.recurring-form select {
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1.5px solid #ddb892;
+  margin-top: 4px;
+}
+
+.recurring-form label {
+  margin-right: 10px;
 }
