@@ -5,7 +5,7 @@ import { Header } from "../../../views/components/Header/Header";
 import "./Upcoming.css";
 
 type Booking = {
-  id: number;
+  id: string;
   roomName: string;
   floor?: string;
   date?: string;
@@ -41,7 +41,7 @@ export const Upcoming = () => {
 
   const openModal = (booking: Booking) => {
     setSelectedBooking(booking);
-    setEditForm({ ...booking });
+    setEditForm({ ...booking, daysOfWeek: booking.daysOfWeek || [] });
     setIsModalOpen(true);
   };
 
@@ -135,16 +135,15 @@ export const Upcoming = () => {
       </div>
       {isModalOpen && selectedBooking && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" style={{ maxWidth: 500, maxHeight: '90vh', overflowY: 'auto', margin: 'auto' }} onClick={(e) => e.stopPropagation()}>
             <span className="close" onClick={closeModal}>
               &times;
             </span>
             <form className="modal-form" onSubmit={handleUpdateBooking}>
               <h2 style={{ textAlign: 'center', marginBottom: 16 }}>Edit Booking</h2>
-              <div style={{ display: 'flex', gap: '20px', marginBottom: 16 }}>
-                <div style={{ flex: 1 }}>
-                  <label>
-                    Floor Number:
+              <div className="row">
+                <div>
+                  <label>Floor Number:
                     <input
                       name="floor"
                       type="text"
@@ -152,8 +151,7 @@ export const Upcoming = () => {
                       onChange={handleEditChange}
                     />
                   </label>
-                  <label>
-                    Room Name:
+                  <label>Room Name:
                     <input
                       name="roomName"
                       type="text"
@@ -161,8 +159,7 @@ export const Upcoming = () => {
                       onChange={handleEditChange}
                     />
                   </label>
-                  <label>
-                    Date:
+                  <label>Date:
                     <input
                       name="date"
                       type="date"
@@ -171,9 +168,8 @@ export const Upcoming = () => {
                     />
                   </label>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label>
-                    Start Time:
+                <div>
+                  <label>Start Time:
                     <input
                       name="startTime"
                       type="time"
@@ -181,8 +177,7 @@ export const Upcoming = () => {
                       onChange={handleEditChange}
                     />
                   </label>
-                  <label>
-                    End Time:
+                  <label>End Time:
                     <input
                       name="endTime"
                       type="time"
@@ -192,8 +187,7 @@ export const Upcoming = () => {
                   </label>
                 </div>
               </div>
-              <label>
-                Purpose of the Booking:
+              <label>Purpose of the Booking:
                 <input
                   name="purpose"
                   type="text"
@@ -201,8 +195,7 @@ export const Upcoming = () => {
                   onChange={handleEditChange}
                 />
               </label>
-              <label>
-                Add Participants:
+              <label>Add Participants:
                 <div className="participant-input">
                   <input
                     type="text"
@@ -230,7 +223,7 @@ export const Upcoming = () => {
                 </div>
               </label>
               {/* Recurring Booking Section */}
-              <div style={{ margin: '18px 0', padding: '14px', background: '#f9f6f2', borderRadius: 10 }}>
+              <div className="recurring-section">
                 <label style={{ fontWeight: 600, marginBottom: 8 }}>
                   <input
                     type="checkbox"
@@ -242,8 +235,7 @@ export const Upcoming = () => {
                 </label>
                 {editForm.recurring && (
                   <div style={{ marginTop: 10 }}>
-                    <label>
-                      Frequency:
+                    <label>Frequency:
                       <select
                         name="frequency"
                         value={editForm.frequency || ""}
@@ -255,8 +247,7 @@ export const Upcoming = () => {
                         <option value="monthly">Monthly</option>
                       </select>
                     </label>
-                    <label>
-                      Recurring End Date:
+                    <label>Recurring End Date:
                       <input
                         name="recurringEndDate"
                         type="date"
@@ -267,7 +258,7 @@ export const Upcoming = () => {
                     {editForm.frequency === 'weekly' && (
                       <label style={{ display: 'block', marginTop: 8 }}>
                         Days of Week:
-                        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                        <div className="days-of-week">
                           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                             <label key={day} style={{ fontWeight: 400 }}>
                               <input
