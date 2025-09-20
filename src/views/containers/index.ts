@@ -8,7 +8,7 @@ export * from "./Homepage/Homepage";
 export * from "./Upcoming/Upcoming";
 export * from "./Past/Past";
 export * from "./Browse/Browse";
-export * from "./Admin/Admin";
+// export * from "./Admin/Admin";
 export * from "./BookingManagement/BookingManagement";
 export * from "./Settings/Settings";
 export { default as AccountSettings } from "./Settings/AccountSettings";

@@ -49,53 +49,162 @@
       "username": "user",
       "password": "user",
       "role": "user"
-        "username": "admin",
-        "password": "admin",
-        "role": "admin"
     },
-    
     {
-        "username": "superadmin",
-        "password": "superadmin",
-        "role": "super admin"
+      "id": "3",
+      "username": "superadmin",
+      "password": "superadmin",
+      "role": "super admin"
     }
   ],
-  "rooms": []
+  "rooms": [
+    {
+      "id": 1,
+      "roomName": "Jamals",
+      "floorNumber": "6",
+      "capacity": 6,
+      "amenities": [
+        "whiteboard",
+        "tables"
+      ],
+      "coverPhoto": "",
+      "available": true
+    }
   ],
   "bookingOverTimeData": [
-    { "time": "9:00 AM", "bookings": 1 },
-    { "time": "10:00 AM", "bookings": 3 },
-    { "time": "11:00 AM", "bookings": 2 },
-    { "time": "12:00 PM", "bookings": 4 },
-    { "time": "1:00 PM", "bookings": 3 },
-    { "time": "2:00 PM", "bookings": 2 },
-    { "time": "3:00 PM", "bookings": 3 },
-    { "time": "4:00 PM", "bookings": 1 }
+    {
+      "time": "9:00 AM",
+      "bookings": 1,
+      "id": "59e3"
+    },
+    {
+      "time": "10:00 AM",
+      "bookings": 3,
+      "id": "792d"
+    },
+    {
+      "time": "11:00 AM",
+      "bookings": 2,
+      "id": "29cc"
+    },
+    {
+      "time": "12:00 PM",
+      "bookings": 4,
+      "id": "aa3f"
+    },
+    {
+      "time": "1:00 PM",
+      "bookings": 3,
+      "id": "b560"
+    },
+    {
+      "time": "2:00 PM",
+      "bookings": 2,
+      "id": "6c6f"
+    },
+    {
+      "time": "3:00 PM",
+      "bookings": 3,
+      "id": "7365"
+    },
+    {
+      "time": "4:00 PM",
+      "bookings": 1,
+      "id": "fd51"
+    }
   ],
   "totalBookingsPerRoomData": [
-    { "name": "A100's", "bookings": 7 },
-    { "name": "B100's", "bookings": 6 },
-    { "name": "C100's", "bookings": 3 }
+    {
+      "name": "A100's",
+      "bookings": 7,
+      "id": "9e6a"
+    },
+    {
+      "name": "B100's",
+      "bookings": 6,
+      "id": "6fbd"
+    },
+    {
+      "name": "C100's",
+      "bookings": 3,
+      "id": "6807"
+    }
   ],
   "bookingsPerUserData": [
-    { "name": "Zekken", "bookings": 1 },
-    { "name": "pewds", "bookings": 7 },
-    { "name": "brucewayne", "bookings": 5 },
-    { "name": "tenz", "bookings": 8 },
-    { "name": "MJF", "bookings": 4 },
-    { "name": "proCreate", "bookings": 4 },
-    { "name": "f0rsaken", "bookings": 4 },
-    { "name": "jasonmraz", "bookings": 4 }
+    {
+      "name": "Zekken",
+      "bookings": 1,
+      "id": "976f"
+    },
+    {
+      "name": "pewds",
+      "bookings": 7,
+      "id": "b3fb"
+    },
+    {
+      "name": "brucewayne",
+      "bookings": 5,
+      "id": "44a3"
+    },
+    {
+      "name": "tenz",
+      "bookings": 8,
+      "id": "0b4c"
+    },
+    {
+      "name": "MJF",
+      "bookings": 4,
+      "id": "f61c"
+    },
+    {
+      "name": "proCreate",
+      "bookings": 4,
+      "id": "2f7a"
+    },
+    {
+      "name": "f0rsaken",
+      "bookings": 4,
+      "id": "42f9"
+    },
+    {
+      "name": "jasonmraz",
+      "bookings": 4,
+      "id": "7de5"
+    }
   ],
   "meetingTypesData": [
-    { "name": "Planned Schedule", "value": 53 },
-    { "name": "Onsite Schedule", "value": 37 }
+    {
+      "name": "Planned Schedule",
+      "value": 53,
+      "id": "8294"
+    },
+    {
+      "name": "Onsite Schedule",
+      "value": 37,
+      "id": "f637"
+    }
   ],
   "meetingRoomAnalyticsData": [
-    { "name": "Board Room", "value": 30 },
-    { "name": "Conference Room", "value": 25 },
-    { "name": "Meeting Room", "value": 20 },
-    { "name": "Training Room", "value": 25 }
+    {
+      "name": "Board Room",
+      "value": 30,
+      "id": "7ae7"
+    },
+    {
+      "name": "Conference Room",
+      "value": 25,
+      "id": "07c8"
+    },
+    {
+      "name": "Meeting Room",
+      "value": 20,
+      "id": "2cae"
+    },
+    {
+      "name": "Training Room",
+      "value": 25,
+      "id": "fb92"
+    }
   ],
   "bookings": [
     {
