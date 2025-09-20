@@ -65,7 +65,7 @@ export const Analytics = () => {
         </div>
 
         <div className="line-chart-container">
-          <label htmlFor="">Booking Over Time</label>
+          <label>Booking Over Time</label>
           <div className="chart-and-icons-container">
             <div className="line-chart">
               <ResponsiveContainer width="100%" height={300}>
