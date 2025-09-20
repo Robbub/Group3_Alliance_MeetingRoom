@@ -54,7 +54,7 @@ export const PATHS = {
   ANALYTICS: {
     path: "/analytics",
     label: "Analytics",
-  }
+  },
   ROOM_MANAGEMENT: {
     path: "/roommanagement",
     label: "RoomManagement",
