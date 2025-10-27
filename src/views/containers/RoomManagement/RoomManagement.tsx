@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FaTrashAlt, FaWrench, FaChevronUp, FaChevronDown, FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
-import { Modal, Button } from 'react-bootstrap';
+import { FaTrashAlt, FaWrench, FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import { Header } from '../../components/Header/Header';
 import './RoomManagement.css';
 import AddRoomModal from '../../components/AddRoomModal/AddRoomModal';
 import EditRoomModal from '../../components/EditRoomModal/EditRoomModal';
-import { Header } from '../../components/Header/Header';
 
 interface Room {
   id: number;
@@ -16,174 +15,177 @@ interface Room {
   available: boolean;
 }
 
-interface AddRoomModalProps {
-  show: boolean;
-  onHide: () => void;
-  onSave: (room: Omit<Room, 'id'>) => void;
-}
-
-export const RoomManagement: React.FC = () => {
+const RoomManagement: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [sortKey, setSortKey] = useState<keyof Room>('roomName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [roomsPerPage] = useState(5);
-  
+  const roomsPerPage = 7;
 
+  // Fetch rooms on mount
   useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/rooms');
-        const data = await response.json();
-        setRooms(data);
-      } catch (error) {
-        console.error('Error fetching rooms:', error);
-      }
-    };
     fetchRooms();
   }, []);
 
-  const handleAddRoom = async (newRoom: Omit<Room, 'id'>) => {
-  try {
-    const response = await fetch('http://localhost:3000/rooms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newRoom), // Let server generate ID
-    });
-    if (!response.ok) throw new Error('Failed to add room');
-    const addedRoom = await response.json();
-    setRooms([...rooms, addedRoom]);
-  } catch (error) {
-    console.error('Error adding room:', error);
-  }
-};
-
-
-const handleEditRoom = async (updatedRoom: Room) => {
-  try {
-    console.log('Sending to server:', updatedRoom);  // Debug log
-    
-    const response = await fetch(`http://localhost:3000/rooms/${updatedRoom.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedRoom),
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to update room');
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/rooms");
+      if (!response.ok) throw new Error('Failed to fetch rooms');
+      const data = await response.json();
+      setRooms(data);
+    } catch (error) {
+      console.error("Error fetching rooms:", error);
+      setRooms([]);
     }
-    
-    const data = await response.json();
-    console.log('Server response:', data);  // Debug log
-    
-    // for updating local state
-    setRooms(rooms.map(room => 
-      room.id === updatedRoom.id ? updatedRoom : room
-    ));
-  } catch (error) {
-    console.error('Error updating room:', error);
-  
-  }
-};
+  };
 
+  // Handle adding a new room
+  const handleAddRoom = async (newRoom: Omit<Room, 'id'>) => {
+    try {
+      console.log('Adding room:', newRoom);
+      
+      const response = await fetch("http://localhost:3000/rooms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newRoom),
+      });
+      
+      if (!response.ok) throw new Error("Failed to add room");
+      
+      const addedRoom = await response.json();
+      console.log('Room added successfully:', addedRoom);
+      
+      // Update local state with the room that has an ID from server
+      setRooms(prev => [...prev, addedRoom]);
+      
+      // Trigger event for Browse component to refresh
+      window.dispatchEvent(new CustomEvent('roomsUpdated'));
+      
+      // Show success message only once
+      alert("Room added successfully!");
+      
+    } catch (error) {
+      console.error("Error adding room:", error);
+      alert("Failed to add room. Please try again.");
+    }
+  };
 
-const handleDeleteRoom = async () => {
-  if (!currentRoom) return; 
+  // Handle editing a room
+  const handleEditRoom = async (updatedRoom: Room) => {
+    try {
+      const response = await fetch(`http://localhost:3000/rooms/${updatedRoom.id}`, {
+        method: "PUT", // Changed from PATCH to PUT for complete replacement
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedRoom),
+      });
+      
+      if (!response.ok) throw new Error("Failed to update room");
+      
+      // Update local state
+      setRooms(prev => prev.map(room => room.id === updatedRoom.id ? updatedRoom : room));
+      setShowEditModal(false);
+      setCurrentRoom(null);
+      
+      // Trigger event for Browse component to refresh
+      window.dispatchEvent(new CustomEvent('roomsUpdated'));
+      
+      alert("Room updated successfully!");
+    } catch (error) {
+      console.error("Error updating room:", error);
+      alert("Failed to update room. Please try again.");
+    }
+  };
 
-  try {
+  // Handle deleting a room
+  const handleDeleteRoom = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this room?")) {
+      try {
+        console.log(`Deleting room with ID: ${id}`);
+        
+        const response = await fetch(`http://localhost:3000/rooms/${id}`, {
+          method: "DELETE",
+        });
+        
+        console.log(`Delete response status: ${response.status}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to delete room: ${response.status}`);
+        }
+        
+        // Update local state
+        setRooms(prev => prev.filter(room => room.id !== id));
+        
+        // Trigger event for Browse component to refresh
+        window.dispatchEvent(new CustomEvent('roomsUpdated'));
+        
+        alert("Room deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting room:", error);
+        alert("Failed to delete room. Please try again.");
+      }
+    }
+  };
 
-    const response = await fetch(
-      `http://localhost:3000/rooms/${currentRoom.id}`,
-      { method: "DELETE" }
+  // Handle search
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value.trim().toLowerCase());
+    setCurrentPage(1);
+  };
+
+  // Handle sorting
+  const handleSort = (key: keyof Room) => {
+    if (key === sortKey) {
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+    setCurrentPage(1);
+  };
+
+  // Filter and sort rooms
+  const filteredRooms = rooms.filter(room => {
+    return (
+      room.roomName.toLowerCase().includes(search) ||
+      room.floorNumber.toLowerCase().includes(search) ||
+      room.amenities.some(amenity => amenity.toLowerCase().includes(search)) ||
+      room.capacity.toString().includes(search)
     );
+  });
 
-    if (!response.ok) throw new Error("Failed to delete room");
+  const sortedRooms = [...filteredRooms].sort((a, b) => {
+    const aValue = a[sortKey];
+    const bValue = b[sortKey];
 
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === 'asc'
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
 
-    setRooms((prevRooms) => 
-      prevRooms.filter((room) => room.id !== currentRoom.id)
-    );
-    setShowDeleteModal(false);
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    }
 
-    alert("Room deleted successfully!");
-  } catch (error) {
-    console.error("Delete error:", error);
-    alert("Failed to delete room. Please try again.");
-  }
-};
+    return 0;
+  });
 
-const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-  setSearch(e.target.value.trim().toLowerCase());
-  setCurrentPage(1);
-};
-
-const handleSort = (key: keyof Room) => {
-  if (key === sortKey) {
-    setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-  } else {
-    setSortKey(key);
-    setSortDirection('asc');
-  }
-  setCurrentPage(1);
-};
-
-const filteredRooms = rooms.filter(room => {
-  return room.roomName.toLowerCase().includes(search) ||
-          room.floorNumber.toString().includes(search) ||
-          room.amenities.some(amenity => amenity.toLowerCase().includes(search)) ||
-          room.capacity.toString().includes(search);
-}
-);
-
-
-const sortedRooms = filteredRooms.slice().sort((a, b) => {
-  const aVal = a[sortKey];
-  const bVal = b[sortKey];
-
-  if (aVal == null && bVal == null) return 0;
-  if (aVal == null) return sortDirection === 'asc' ? 1 : -1;
-  if (bVal == null) return sortDirection === 'asc' ? -1 : 1;
-
-  if (typeof aVal === 'string' && typeof bVal === 'string') {
-    return sortDirection === 'asc'
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  }
-
-  if (typeof aVal === 'number' && typeof bVal === 'number') {
-    return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-  }
-
-  if (Array.isArray(aVal) && Array.isArray(bVal)) {
-    const aStr = aVal.join(', ').toLowerCase();
-    const bStr = bVal.join(', ').toLowerCase();
-    return sortDirection === 'asc'
-      ? aStr.localeCompare(bStr)
-      : bStr.localeCompare(aStr);
-  }
-
-  return 0;
-});
-
-const totalPages = Math.max(1, Math.ceil(sortedRooms.length / roomsPerPage));
-const safeCurrentPage = Math.max(1, Math.min(currentPage, totalPages));
-const indexOfLastRoom = safeCurrentPage * roomsPerPage;
-const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
-const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
-
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(sortedRooms.length / roomsPerPage));
+  const indexOfLastRoom = currentPage * roomsPerPage;
+  const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
+  const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
 
   return (
     <div className="room-management-page">
       <Header />
       <div className="room-management-content">
         <div className="room-management-header">
-          <p className="manage-rooms-heading">Manage Rooms</p>
+          <h1 className="manage-rooms-heading">Manage Rooms</h1>
           <div className="search-and-add">
             <input
               type="text"
@@ -205,19 +207,16 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
           <table className="room-table">
             <thead>
               <tr>
-                {/* <th onClick={() => handleSort('roomName')}>
+                <th onClick={() => handleSort('roomName')} className="sortable">
                   Room Name {sortKey === 'roomName' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
                 </th>
-                <th onClick={() => handleSort('floorNumber')}>
+                <th onClick={() => handleSort('floorNumber')} className="sortable">
                   Floor {sortKey === 'floorNumber' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th> */}
-                {/* <th onClick={() => handleSort('capacity')}>
+                </th>
+                <th onClick={() => handleSort('capacity')} className="sortable">
                   Capacity {sortKey === 'capacity' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th> */}
-                <th>Room Name</th>
-                <th>Floor Number</th>
+                </th>
                 <th>Amenities</th>
-                <th>Capacity</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -226,6 +225,7 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
                 <tr key={room.id}>
                   <td>{room.roomName}</td>
                   <td>{room.floorNumber}</td>
+                  <td>{room.capacity}</td>
                   <td>
                     <div className="amenities-list">
                       {room.amenities.map((amenity, i) => (
@@ -233,24 +233,22 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
                       ))}
                     </div>
                   </td>
-                  <td>{room.capacity}</td>
                   <td>
                     <div className="action-buttons">
                       <button 
-                        className="action-btn" 
+                        className="action-btn edit" 
                         onClick={() => {
                           setCurrentRoom(room);
                           setShowEditModal(true);
                         }}
+                        title="Edit Room"
                       >
                         <FaWrench />
                       </button>
                       <button 
                         className="action-btn delete" 
-                        onClick={() => {
-                          setCurrentRoom(room);
-                          setShowDeleteModal(true);
-                        }}
+                        onClick={() => handleDeleteRoom(room.id)}
+                        title="Delete Room"
                       >
                         <FaTrashAlt />
                       </button>
@@ -260,23 +258,40 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
               ))}
             </tbody>
           </table>
+        </div>
 
+        {/* Pagination */}
+        {totalPages > 1 && (
           <div className="pagination">
             <button 
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              className="pagination-btn" 
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} 
               disabled={currentPage === 1}
             >
-              <FaChevronCircleLeft />
+              ‹
             </button>
-            <span>Page {currentPage} of {totalPages}</span>
+            
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={`page-number ${currentPage === i + 1 ? "active" : ""}`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+            
             <button 
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              className="pagination-btn" 
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} 
               disabled={currentPage === totalPages}
             >
-              <FaChevronCircleRight />
+              ›
             </button>
           </div>
+        )}
 
+        {/* Modals */}
         <AddRoomModal
           show={showAddModal}
           onHide={() => setShowAddModal(false)}
@@ -287,56 +302,17 @@ const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
         {currentRoom && (
           <EditRoomModal
             show={showEditModal}
-            onHide={() => setShowEditModal(false)}
+            onHide={() => {
+              setShowEditModal(false);
+              setCurrentRoom(null);
+            }}
             room={currentRoom}
             onSave={handleEditRoom}
           />
         )}
-
-        {currentRoom && (
-          <Modal 
-            show={showDeleteModal} 
-            onHide={() => {
-              setShowDeleteModal(false);
-              setCurrentRoom(null);
-            }}
-            
-           
-            keyboard={false}
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-            dialogClassName="modal-dialog-centered"
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>Confirm Deletion</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              Are you sure you want to delete <strong>{currentRoom.roomName}</strong>? 
-              This will also delete all bookings for this room.
-            </Modal.Body>
-            <Modal.Footer>
-              <Button 
-                variant="secondary" 
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setCurrentRoom(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button 
-               
-                variant="danger"
-                className="delete-btn"
-                onClick={() => handleDeleteRoom()} 
-              >
-                Delete
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        )}
-      </div> 
-    </div> 
-  </div>
+      </div>
+    </div>
   );
 };
+
+export default RoomManagement;

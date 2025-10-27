@@ -40,28 +40,62 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
     setAmenities(amenities.filter(a => a !== amenity));
   };
 
- const handleSave = () => {
-   
-    const maxId = existingRooms.reduce(
-      (max, room) => Math.max(max, room.id), 
-      0
-    );
-    const newId = maxId + 1;
+  const handleSave = async () => {
+    if (!roomName.trim()) {
+      alert('Please enter a room name');
+      return;
+    }
 
-    onSave({
-      id: newId, 
-      roomName,
+    if (amenities.length === 0) {
+      alert('Please add at least one amenity');
+      return;
+    }
+
+    // Check for duplicate room names
+    const isDuplicate = existingRooms.some(room => 
+      room.roomName.toLowerCase() === roomName.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      alert('A room with this name already exists. Please choose a different name.');
+      return;
+    }
+
+    const newRoom: Omit<Room, 'id'> = {
+      roomName: roomName.trim(),
       floorNumber,
       capacity: parseInt(capacity),
       amenities,
-      coverPhoto: coverPhotoFile?.name || '',
+      coverPhoto: coverPhoto || getDefaultImage(),
       available: true
-    });
+    };
+
+    // Only pass data to parent, don't make API call here
+    onSave(newRoom as Room); // Parent will handle the API call and add the ID
+    
+    // Reset form
+    setRoomName('');
+    setFloorNumber('1');
+    setCapacity('1');
+    setAmenities([]);
+    setTempAmenity('');
+    setCoverPhoto('');
+    setCoverPhotoFile(null);
+    
     onHide();
+    // Remove the alert from here - parent will handle it
   };
 
-
-
+  const getDefaultImage = () => {
+    const defaultImages = [
+      "/assets/meeting-room2.jpg",
+      "/assets/meeting-room7.png",
+      "/assets/meeting-room4.png",
+      "/assets/meeting-room5.jpg",
+      "/assets/meeting-room6.png"
+    ];
+    return defaultImages[Math.floor(Math.random() * defaultImages.length)];
+  };
 
   const floorOptions = Array.from({ length: 17 }, (_, i) => (i + 1).toString());
   const capacityOptions = Array.from({ length: 50 }, (_, i) => (i + 1).toString());

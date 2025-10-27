@@ -63,5 +63,13 @@ export const PATHS = {
     path: "/usermanagement",
     label: "User Management",
   },  
+  BOOK: {
+    path: "/book",
+    label: "Book"
+  },
+  BOOK_ROOMS: {
+    path: "/book/rooms",
+    label: "Book Rooms"
+  },
   // Add more routes here
 };

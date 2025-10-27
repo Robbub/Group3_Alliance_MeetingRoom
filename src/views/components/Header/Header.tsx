@@ -60,7 +60,7 @@ export const Header = () => {
           <div className="manage-options">
             <Link to={
               currentUser?.role === "admin" || currentUser?.role === "super admin"
-                ? "/admin"
+                ? "/roommanagement"  // Changed from "/admin" to "/roommanagement"
                 : "/upcoming"
             }>
               Manage Rooms
@@ -85,7 +85,7 @@ export const Header = () => {
               <ul className="notification-list">
                 <li><span>🔔</span> You have an upcoming meeting at 3PM</li>
                 <li><span>🔔</span> Reminder: 'Marketing Sync' starts in 15 minutes.</li>
-                <li><span>✉️</span> You’ve been invited to 'Project Planning'</li>
+                <li><span>✉️</span> You've been invited to 'Project Planning'</li>
                 <li><span>✉️</span> Chris has invited you to a meeting</li>
                 <li><span>❌</span> You missed your meeting: 'Q2 Budget Review'</li>
                 <li><span>❌</span> No-show: 'Client Briefing' went unattended.</li>

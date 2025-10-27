@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "../../../views/components/Header/Header";
 import BookingModal from "../../../views/components/BookingModal/BookingModal";
 import "./Browse.css";
+import { useSearchParams } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 type Room = {
@@ -13,7 +14,52 @@ type Room = {
   capacity: number;
 };
 
+// Fallback data in case server is down
+const fallbackRooms: Room[] = [
+  {
+    id: 1,
+    name: "Board Room",
+    floor: "6th Floor",
+    image: "/assets/meeting-room2.jpg",
+    amenities: ["Air-con", "Whiteboard", "Projector", "Video Conferencing"],
+    capacity: 12,
+  },
+  {
+    id: 2,
+    name: "Innovation Hub",
+    floor: "6th Floor",
+    image: "/assets/meeting-room7.png",
+    amenities: ["Air-con", "Smart TV", "Whiteboard", "Coffee Machine"],
+    capacity: 8,
+  },
+  {
+    id: 3,
+    name: "Strategy Room",
+    floor: "7th Floor",
+    image: "/assets/meeting-room4.png",
+    amenities: ["Air-con", "Projector", "Ergonomic Chairs"],
+    capacity: 6,
+  },
+  {
+    id: 4,
+    name: "Collaboration Space",
+    floor: "7th Floor",
+    image: "/assets/meeting-room5.jpg",
+    amenities: ["Air-con", "Whiteboard", "Standing Desks", "Video Conferencing"],
+    capacity: 10,
+  },
+  {
+    id: 5,
+    name: "Executive Suite",
+    floor: "8th Floor",
+    image: "/assets/meeting-room6.png",
+    amenities: ["Air-con", "Leather Chairs", "Privacy Glass", "Mini Fridge"],
+    capacity: 4,
+  },
+];
+
 export const Browse = () => {
+  const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,26 +67,96 @@ export const Browse = () => {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
 
-  const rooms: Room[] = Array.from({ length: 100 }, (_, index) => ({
-    id: index + 1,
-    name: `Room ${index + 1}`,
-    floor: "17th Floor",
-    image: "/assets/meeting-room2.jpg",
-    amenities: [
-      "Smart Boards",
-      "Projection Screens",
-      "Built-in TVs",
-      "Speakers",
-      "Boardroom table with power outlets",
-    ],
-    capacity: 12,
-  }));
+  const [searchParams] = useSearchParams();
+  const amenitiesParam = searchParams.get("amenities");
+  const initialAmenities = amenitiesParam ? decodeURIComponent(amenitiesParam).split(",") : [];
 
-  const filteredRooms = rooms.filter((room) => {
-    return (
-      room.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedDate === "" || room.floor.includes(selectedDate))
-    );
+  const date = searchParams.get("date") || "";
+  const startTime = searchParams.get("startTime") || "09:00";
+  const endTime = searchParams.get("endTime") || "15:00";
+  const title = searchParams.get("title") || "";
+  const endDate = searchParams.get("endDate") || "";
+
+  // Fetch rooms from server
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/rooms');
+      if (!response.ok) throw new Error('Failed to fetch rooms');
+      
+      const roomsData = await response.json();
+      console.log('Fetched rooms data:', roomsData);
+      
+      // Transform server data to Browse format
+      const transformedRooms: Room[] = roomsData.map((room: any) => ({
+        id: room.id,
+        name: room.roomName,
+        floor: `${getFloorSuffix(room.floorNumber)} Floor`,
+        image: room.coverPhoto || getDefaultImage(room.id),
+        amenities: room.amenities || [],
+        capacity: room.capacity,
+      }));
+      
+      setAllRooms(transformedRooms);
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      // Use fallback data if server is down
+      setAllRooms(fallbackRooms);
+    }
+  };
+
+  // Helper function to get floor suffix
+  const getFloorSuffix = (floor: string | number) => {
+    const num = typeof floor === 'string' ? parseInt(floor) : floor;
+    if (num === 1) return '1st';
+    if (num === 2) return '2nd';
+    if (num === 3) return '3rd';
+    return `${num}th`;
+  };
+
+  // Helper function to get default image
+  const getDefaultImage = (id: number) => {
+    const images = [
+      "/assets/meeting-room2.jpg",
+      "/assets/meeting-room7.png",
+      "/assets/meeting-room4.png",
+      "/assets/meeting-room5.jpg",
+      "/assets/meeting-room6.png"
+    ];
+    return images[(id - 1) % images.length];
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  // Listen for room updates from RoomManagement
+  useEffect(() => {
+    let isUpdating = false;
+    
+    const handleRoomsUpdate = () => {
+      if (isUpdating) return; // Prevent multiple simultaneous updates
+      isUpdating = true;
+      
+      console.log('Rooms updated event received, refetching...');
+      fetchRooms().finally(() => {
+        isUpdating = false;
+      });
+    };
+
+    window.addEventListener('roomsUpdated', handleRoomsUpdate);
+
+    return () => {
+      window.removeEventListener('roomsUpdated', handleRoomsUpdate);
+    };
+  }, []);
+
+  const filteredRooms = allRooms.filter((room) => {
+    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesAmenities = initialAmenities.length === 0 || 
+      initialAmenities.every(amenity => room.amenities.includes(amenity));
+    
+    return matchesSearch && matchesAmenities;
   });
 
   const roomsPerPage = 16;
@@ -89,16 +205,6 @@ export const Browse = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
           <button>SEARCH</button>
         </div>
 
@@ -109,7 +215,15 @@ export const Browse = () => {
               className="room-card"
               onClick={() => openModal(room)}
             >
-              <img src={room.image} alt={room.name} className="room-image" />
+              <img 
+                src={room.image} 
+                alt={room.name} 
+                className="room-image"
+                onError={(e) => {
+                  // Fallback to default image if current image fails
+                  e.currentTarget.src = getDefaultImage(room.id);
+                }}
+              />
               <div className="room-details">
                 <p>{room.floor}</p>
                 <p>{room.name}</p>
@@ -118,23 +232,25 @@ export const Browse = () => {
           ))}
         </div>
 
-        <div className="pagination">
-          <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>
-            &lt;
-          </button>
-          {Array.from({ length: Math.min(totalPages, 10) }, (_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => setCurrentPage(index + 1)}
-              className={currentPage === index + 1 ? "active" : ""}
-            >
-              {index + 1}
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>
+              &lt;
             </button>
-          ))}
-          <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}>
-            &gt;
-          </button>
-        </div>
+            {Array.from({ length: Math.min(totalPages, 10) }, (_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => setCurrentPage(index + 1)}
+                className={currentPage === index + 1 ? "active" : ""}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}>
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
 
       {isModalOpen && selectedRoom && (
@@ -168,6 +284,9 @@ export const Browse = () => {
                 src={selectedRoom.image}
                 alt={selectedRoom.name}
                 className="modal-image"
+                onError={(e) => {
+                  e.currentTarget.src = getDefaultImage(selectedRoom.id);
+                }}
               />
             </div>
             <div className="modal-divider"></div>
@@ -200,10 +319,18 @@ export const Browse = () => {
       {showBookingModal && selectedRoom && (
         <BookingModal
           room={selectedRoom}
+          bookingData={{
+            date,
+            startTime,
+            endTime,
+            purpose: title,
+            amenities: initialAmenities,
+            endDate: endDate
+          }}
           onClose={(goBack) => {
             setShowBookingModal(false);
             if (goBack) {
-              setIsModalOpen(true); // return to preview modal
+              setIsModalOpen(true);
             }
           }}
         />
