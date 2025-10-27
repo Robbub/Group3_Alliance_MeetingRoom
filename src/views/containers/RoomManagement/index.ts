@@ -1,1 +1,1 @@
-export * from "./RoomManagement";
+export { default } from './RoomManagement';

@@ -15,10 +15,22 @@
   background: #f3dfc9;
   border-radius: 16px;
   padding: 30px;
-  width: 400px;
+  height: 550px;
+  width: 600px;
   position: relative;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   font-family: sans-serif;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.add-user-modal h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+  color: #64442F;
 }
 
 .close-button {
@@ -38,11 +50,17 @@
   margin-bottom: 20px;
 }
 
-.avatar {
+.avatar-container {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: #ddd;
+  overflow: hidden;
+}
+
+.avatar-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .upload-btn {
@@ -51,21 +69,69 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: #64442F;
 }
 
 .form-group input {
   width: 100%;
   padding: 10px;
-  margin-bottom: 10px;
   border-radius: 8px;
   border: 1px solid #c8a97e;
   background: white;
+  font-size: 14px;
 }
 
 .role-section {
+  margin: 20px 0;
+}
+
+.role-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #64442F;
+}
+
+.role-options {
   display: flex;
-  gap: 12px;
-  margin: 12px 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.role-option input[type="radio"] {
+  accent-color: #64442F;
+}
+
+.role-option .radio-label {
+  font-size: 14px;
+  color: #64442F;
 }
 
 .submit-btn {
@@ -77,4 +143,16 @@
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+/* Remove scrollbar */
+.add-user-modal::-webkit-scrollbar {
+  display: none;
+}
+
+.add-user-modal {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

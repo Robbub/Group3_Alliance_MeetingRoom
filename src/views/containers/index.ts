@@ -1,4 +1,4 @@
-export * from "./Main";
+// export * from "./Main";
 export * from "./NotFound";
 export * from "./Dashboard";
 export * from "./Login";
@@ -17,4 +17,4 @@ export { default as NotificationSettings } from "./Settings/NotificationSettings
 export { default as AppearanceSettings } from "./Settings/AppearanceSettings";
 export * from "./UserManagement";
 export * from "./Analytics/Analytics"
-export * from "./RoomManagement/RoomManagement";
+export { default as RoomManagement } from "./RoomManagement";

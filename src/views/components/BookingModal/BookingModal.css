@@ -7,8 +7,11 @@
   background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; /* Center vertically */
   z-index: 999;
+  overflow-y: auto;
+  padding: 40px 20px; /* Space from top/bottom/sides */
+  box-sizing: border-box;
 }
 
 .booking-modal {
@@ -16,9 +19,33 @@
   padding: 32px 40px;
   border-radius: 16px;
   width: 580px;
+  max-width: 90vw;
+  max-height: calc(100vh - 120px); /* Leave 120px margin (60px top + 60px bottom) */
+  min-height: 200px;
+  overflow-y: auto;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
   font-family: "Segoe UI", sans-serif;
   position: relative;
+  margin: auto; /* Auto margin for centering */
+  box-sizing: border-box;
+}
+
+.booking-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.booking-modal::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.booking-modal::-webkit-scrollbar-thumb {
+  background: #c4a484;
+  border-radius: 4px;
+}
+
+.booking-modal::-webkit-scrollbar-thumb:hover {
+  background: #b5805c;
 }
 
 .modal-title {
@@ -179,4 +206,86 @@
 
 .recurring-form label {
   margin-right: 10px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.participant-input {
+  position: relative;
+}
+
+.participant-input input {
+  padding: 10px;
+  font-size: 14px;
+  border: 2px solid #ddb892;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.selected-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.participant-tag {
+  background-color: #eee;
+  padding: 5px 10px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #4a2e1f;
+  background: #f5ede3;
+  border: 1px solid #b5805c;
+}
+
+.participant-tag span {
+  cursor: pointer;
+  margin-left: 6px;
+  font-weight: bold;
+  color: #8b5e3c;
+}.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.participant-input {
+  position: relative;
+}
+
+.participant-input input {
+  padding: 10px;
+  font-size: 14px;
+  border: 2px solid #ddb892;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.selected-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.participant-tag {
+  background-color: #eee;
+  padding: 5px 10px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #4a2e1f;
+  background: #f5ede3;
+  border: 1px solid #b5805c;
+}
+
+.participant-tag span {
+  cursor: pointer;
+  margin-left: 6px;
+  font-weight: bold;
+  color: #8b5e3c;
 }
