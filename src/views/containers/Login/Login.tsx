@@ -7,15 +7,19 @@ import "./Login.css";
 
 interface User {
   id: number | string;
-  username: string;
-  password: string;
+  userId: string;
   role: string;
+  email?: string;
   firstName?: string;
   lastName?: string;
-  name?: string;
-  email?: string;
-  avatar?: string;
-  lastSeen?: string;
+}
+
+interface LoginResponse {
+  loginResult: number;
+  message: string;
+  access_token: string;
+  expires_in: number;
+  userData: User;
 }
 
 export const Login = () => {
@@ -29,62 +33,48 @@ export const Login = () => {
 
     try {
       console.log("Attempting login with:", formData.username);
-      
-      const response = await fetch("http://localhost:3000/users");
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const users: User[] = await response.json();
-      console.log("Retrieved users:", users);
 
-      // Debug: Log all usernames and roles
-      users.forEach(user => {
-        console.log(`User: ${user.username}, Role: ${user.role}`);
+      const response = await fetch("https://localhost:50552/api/Account/Login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: formData.username,
+          password: formData.password,
+        }),
       });
 
-      const user = users.find(
-        (u: User) => {
-          console.log(`Checking: ${u.username} === ${formData.username} && ${u.password} === ${formData.password}`);
-          return u.username === formData.username && u.password === formData.password;
-        }
-      );
-
-      if (user) {
-        console.log("Login successful for user:", user);
-        
-        try {
-          // Update lastSeen timestamp
-          await fetch(`http://localhost:3000/users/${user.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-              lastSeen: new Date().toLocaleString() 
-            }),
-          });
-        } catch (updateError) {
-          console.error("Failed to update lastSeen:", updateError);
-          // Continue with login even if lastSeen update fails
-        }
-
-        // Store user info in localStorage
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("username", formData.username);
-        
-        alert("Login successful!");
-        
-        // Navigate based on role
-        console.log("User role:", user.role);
-        if (user.role === "admin" || user.role === "super admin") {
-          navigate("/usermanagement");
-        } else {
-          navigate(PATHS.HOMEPAGE.path);
-        }
-      } else {
-        console.log("No matching user found");
-        alert("Invalid username or password.");
+      if (!response.ok) {
+        const msg = await response.text();
+        alert(msg || "Invalid login credentials.");
+        return;
       }
+
+      const result: LoginResponse = await response.json();
+      console.log("Login response:", result);
+
+      // Check login success
+      if (result.loginResult !== 0) {
+        alert(result.message || "Login failed.");
+        return;
+      }
+
+      const user = result.userData;
+
+      // Save user and token to localStorage
+      localStorage.setItem("token", result.access_token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      alert("Login successful!");
+
+      // Redirect user based on role
+      if (user.role === "admin" || user.role === "super admin") {
+        navigate("/usermanagement");
+      } else {
+        navigate(PATHS.HOMEPAGE.path);
+      }
+
     } catch (error) {
       console.error("Error logging in:", error);
       alert("Failed to log in. Please check your connection and try again.");
@@ -94,51 +84,49 @@ export const Login = () => {
   };
 
   return (
-    <>
-      <div className="login-page">
-        <Header />
-        <div className="login-container">
-          <h1 className="login-title">LOG IN</h1>
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="username">Username</label>
-              <input
-                type="text"
-                id="username"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                placeholder="Enter your username or email address"
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                placeholder="Enter your password"
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <button type="submit" className="login-button" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Log In"}
-            </button>
-          </form>
-          
-          <div className="signup-link">
-            New User? <a href="/register">Sign Up</a>
+    <div className="login-page">
+      <Header />
+      <div className="login-container">
+        <h1 className="login-title">LOG IN</h1>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+              placeholder="Enter your username or email address"
+              required
+              disabled={isLoading}
+            />
           </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              placeholder="Enter your password"
+              required
+              disabled={isLoading}
+            />
+          </div>
+          <button type="submit" className="login-button" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Log In"}
+          </button>
+        </form>
+
+        <div className="signup-link">
+          New User? <a href="/register">Sign Up</a>
         </div>
-        <Footer />
       </div>
-    </>
+      <Footer />
+    </div>
   );
 };
