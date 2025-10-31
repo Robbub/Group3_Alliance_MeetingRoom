@@ -22,24 +22,25 @@ export const Register = () => {
       return;
     }
 
-    try {
-      await fetch("http://localhost:3000/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName
-        }),
-      });
+    const response = await fetch("https://localhost:50552/api/Account/Register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: formData.username,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      }),
+    });
 
-      alert("Registration successful!");
-      navigate(PATHS.LOGIN.path);
-    } catch (error) {
-      console.error("Error registering user:", error);
-      alert("Failed to register. Please try again.");
+    if (!response.ok) {
+      const msg = await response.text();
+      alert(msg || "Failed to register.");
+      return;
     }
+
+    alert("Registration successful!");
+    navigate(PATHS.LOGIN.path);
   };
 
   return (
