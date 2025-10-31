@@ -91,6 +91,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
   });
 
   const [error, setError] = useState<string>("");
+  const [conflicts, setConflicts] = useState<Array<{id?: any; start: Date; end: Date; reason?: string}>>([]);
   const [availableParticipants, setAvailableParticipants] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showParticipantDropdown, setShowParticipantDropdown] = useState(false);
@@ -198,6 +199,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setConflicts([]);
     
     const date = formData.recurring ? formData.recurringStartDate : formData.date;
     if (!formData.roomName || !formData.floor || !date || !formData.startTime || !formData.endTime) {
@@ -239,24 +241,281 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
     console.log("Booking data to submit:", bookingSubmissionData);
     
     try {
+      // --- Availability checks before submitting ---
+  // 1) Fetch existing bookings for the selected room name (use the current Room select value)
+  const selectedRoomName = formData.roomName || room.name;
+  const bookingsRes = await fetch(`http://localhost:3000/bookings?roomName=${encodeURIComponent(selectedRoomName)}`);
+  const existingBookings = bookingsRes.ok ? await bookingsRes.json() : [];
+
+  // 2) Filter out cancelled bookings (if stored with status)
+  const activeBookings = existingBookings.filter((b: any) => !b.status || b.status !== 'cancelled');
+
+  // DEBUG: log fetched bookings so we can see what the server returned for this room
+  console.debug('Fetched bookings for room', room.id, existingBookings);
+
+      // 3) Configuration: buffer minutes and room capacity from room object (fallbacks)
+      const BUFFER_MINUTES = (room as any).bufferMinutes || 15; // configurable per-room
+      const bufferMs = BUFFER_MINUTES * 60 * 1000;
+
+      // Helper: check if two ranges overlap considering a buffer (in ms)
+      const rangesOverlap = (aStart: Date, aEnd: Date, bStart: Date, bEnd: Date, buffer = bufferMs) => {
+        const aStartBuff = new Date(aStart.getTime() - buffer);
+        const aEndBuff = new Date(aEnd.getTime() + buffer);
+        return !(bEnd <= aStartBuff || bStart >= aEndBuff);
+      };
+
+      const isValidDate = (d: any) => d instanceof Date && !isNaN(d.getTime());
+
+      // Parse date/time helper
+      const parseDateTime = (d: string, t: string) => new Date(d + 'T' + t);
+
+      const newStart = parseDateTime(date, formData.startTime);
+      const newEnd = parseDateTime(date, formData.endTime);
+
+      // Validate time ordering
+      if (newEnd <= newStart) {
+        setError('End time must be after start time.');
+        return;
+      }
+
+      // Capacity check for single instance
+      if ((room.capacity || 0) > 0 && allParticipants.length > room.capacity) {
+        setError(`Room capacity exceeded (capacity: ${room.capacity}). Remove some participants or choose a bigger room.`);
+        return;
+      }
+
+      // Check maintenance windows if available on the room (room.maintenance is optional array of {day,start,end})
+      try {
+        const maintenance = (room as any).maintenance || [];
+        for (const m of maintenance) {
+          const mDay = typeof m.day === 'string' ? parseInt(m.day) : m.day;
+          const bookingDay = newStart.getDay();
+          if (mDay === bookingDay) {
+            const maintenanceStart = new Date(newStart);
+            const [msH, msM] = (m.start || '00:00').split(':').map(Number);
+            maintenanceStart.setHours(msH, msM, 0, 0);
+            const maintenanceEnd = new Date(newStart);
+            const [meH, meM] = (m.end || '00:00').split(':').map(Number);
+            maintenanceEnd.setHours(meH, meM, 0, 0);
+            if (rangesOverlap(maintenanceStart, maintenanceEnd, newStart, newEnd, 0)) {
+              setError('Selected time conflicts with scheduled maintenance.');
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        // ignore malformed maintenance info
+      }
+
+      // 4) Check direct overlap for single instance (non-recurring existing bookings)
+      for (const b of activeBookings) {
+        if (b.recurring) continue; // recurring entries handled below
+        const exStart = new Date(b.date + 'T' + (b.startTime || '00:00'));
+        const exEnd = new Date(b.date + 'T' + (b.endTime || '00:00'));
+        if (!isValidDate(exStart) || !isValidDate(exEnd)) {
+          console.warn('Skipping malformed booking dates for', b);
+          continue;
+        }
+        if (rangesOverlap(exStart, exEnd, newStart, newEnd)) {
+          console.debug('Conflict with existing single booking', { booking: b, exStart, exEnd, newStart, newEnd });
+          setConflicts([{ id: b.id || b.roomId || 'unknown', start: exStart, end: exEnd, reason: 'Existing booking' }]);
+          setError('Selected time conflicts with existing booking(s). See details below.');
+          return;
+        }
+      }
+
+      // Helper: generate recurring instances for an existing booking object
+      const generateRecurringInstances = (b: any, untilDateStr?: string, maxInstances = 500) => {
+        const instances: { start: Date; end: Date }[] = [];
+        try {
+          if (!b.recurring) return instances;
+          const freq = (b.frequency || 'daily').toLowerCase();
+          const startDate = new Date(b.date);
+          const endDate = b.recurringEndDate ? new Date(b.recurringEndDate) : (untilDateStr ? new Date(untilDateStr) : startDate);
+          const daysOfWeek: string[] = Array.isArray(b.daysOfWeek) ? b.daysOfWeek : [];
+
+          let cursor = new Date(startDate);
+          let count = 0;
+          while (cursor <= endDate && count < maxInstances) {
+            if (freq === 'daily') {
+              const s = new Date(cursor.toDateString() + 'T' + (b.startTime || '00:00'));
+              const e = new Date(cursor.toDateString() + 'T' + (b.endTime || '00:00'));
+              instances.push({ start: s, end: e });
+              cursor.setDate(cursor.getDate() + 1);
+              count++;
+            } else if (freq === 'weekly') {
+              if (daysOfWeek.length > 0) {
+                const weekStart = new Date(cursor);
+                for (let d = 0; d < 7 && count < maxInstances; d++) {
+                  const day = new Date(weekStart);
+                  day.setDate(weekStart.getDate() + d);
+                  const shortNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                  const short = shortNames[day.getDay()];
+                  if (daysOfWeek.includes(short)) {
+                    const s = new Date(day.toDateString() + 'T' + (b.startTime || '00:00'));
+                    const e = new Date(day.toDateString() + 'T' + (b.endTime || '00:00'));
+                    if (s <= endDate) {
+                      instances.push({ start: s, end: e });
+                      count++;
+                    }
+                  }
+                }
+                cursor.setDate(cursor.getDate() + 7);
+              } else {
+                const s = new Date(cursor.toDateString() + 'T' + (b.startTime || '00:00'));
+                const e = new Date(cursor.toDateString() + 'T' + (b.endTime || '00:00'));
+                instances.push({ start: s, end: e });
+                cursor.setDate(cursor.getDate() + 7);
+                count++;
+              }
+            } else if (freq === 'monthly') {
+              const s = new Date(cursor.toDateString() + 'T' + (b.startTime || '00:00'));
+              const e = new Date(cursor.toDateString() + 'T' + (b.endTime || '00:00'));
+              instances.push({ start: s, end: e });
+              cursor.setMonth(cursor.getMonth() + 1);
+              count++;
+            } else {
+              const s = new Date(cursor.toDateString() + 'T' + (b.startTime || '00:00'));
+              const e = new Date(cursor.toDateString() + 'T' + (b.endTime || '00:00'));
+              instances.push({ start: s, end: e });
+              cursor.setDate(cursor.getDate() + 1);
+              count++;
+            }
+          }
+        } catch (err) {
+          // ignore generator errors
+        }
+        return instances;
+      };
+
+      // 6) Check recurring bookings in existing bookings against this single instance
+      for (const b of activeBookings) {
+        if (!b.recurring) continue;
+        const instances = generateRecurringInstances(b, formData.recurringEndDate || date);
+        // DEBUG: show a sample of instances generated for this recurring booking
+        console.debug('Recurring booking instances for', b.id || b.roomId || '(no-id)', instances.slice(0,5));
+        for (const inst of instances) {
+          if (!isValidDate(inst.start) || !isValidDate(inst.end)) {
+            console.warn('Skipping malformed recurring instance for', b, inst);
+            continue;
+          }
+          if (rangesOverlap(inst.start, inst.end, newStart, newEnd)) {
+            console.debug('Conflict with recurring booking', { booking: b, instance: inst, newStart, newEnd });
+            setConflicts([{ id: b.id || b.roomId || 'unknown', start: inst.start, end: inst.end, reason: 'Recurring booking' }]);
+            setError('Selected time conflicts with existing recurring booking(s). See details below.');
+            return;
+          }
+        }
+      }
+
+      // If recurring booking is being created, perform checks across generated instances
+      if (formData.recurring && formData.recurringStartDate && (formData.recurringEndDate || formData.endType === 'occurrences')) {
+        // Generate instance dates for the requested recurrence
+        const freq = (formData.frequency || 'daily').toLowerCase();
+        const startCursor = new Date(formData.recurringStartDate);
+        const endCursor = formData.recurringEndDate ? new Date(formData.recurringEndDate) : null;
+        const requestedInstances: { start: Date; end: Date }[] = [];
+        let cursor = new Date(startCursor);
+        let occurrences = 0;
+        const maxOcc = formData.endType === 'occurrences' ? (formData.maxOccurrences || 0) : Infinity;
+        const reqDaysOfWeek: string[] = Array.isArray(formData.daysOfWeek) ? formData.daysOfWeek : [];
+
+        while ((endCursor ? cursor <= endCursor : occurrences < maxOcc) && occurrences < 1000) {
+          if (freq === 'daily') {
+            const s = new Date(cursor.toDateString() + 'T' + formData.startTime);
+            const e = new Date(cursor.toDateString() + 'T' + formData.endTime);
+            requestedInstances.push({ start: s, end: e });
+            cursor.setDate(cursor.getDate() + (formData.recurInterval || 1));
+            occurrences++;
+          } else if (freq === 'weekly') {
+            if (reqDaysOfWeek.length > 0) {
+              const weekStart = new Date(cursor);
+              for (let d = 0; d < 7 && occurrences < maxOcc && occurrences < 1000; d++) {
+                const day = new Date(weekStart);
+                day.setDate(weekStart.getDate() + d);
+                const shortNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                const short = shortNames[day.getDay()];
+                if (reqDaysOfWeek.includes(short)) {
+                  const s = new Date(day.toDateString() + 'T' + formData.startTime);
+                  const e = new Date(day.toDateString() + 'T' + formData.endTime);
+                  if (!endCursor || s <= endCursor) {
+                    requestedInstances.push({ start: s, end: e });
+                    occurrences++;
+                  }
+                }
+              }
+              cursor.setDate(cursor.getDate() + 7 * (formData.recurInterval || 1));
+            } else {
+              const s = new Date(cursor.toDateString() + 'T' + formData.startTime);
+              const e = new Date(cursor.toDateString() + 'T' + formData.endTime);
+              requestedInstances.push({ start: s, end: e });
+              cursor.setDate(cursor.getDate() + 7 * (formData.recurInterval || 1));
+              occurrences++;
+            }
+          } else if (freq === 'monthly') {
+            const s = new Date(cursor.toDateString() + 'T' + formData.startTime);
+            const e = new Date(cursor.toDateString() + 'T' + formData.endTime);
+            requestedInstances.push({ start: s, end: e });
+            cursor.setMonth(cursor.getMonth() + (formData.recurInterval || 1));
+            occurrences++;
+          } else {
+            const s = new Date(cursor.toDateString() + 'T' + formData.startTime);
+            const e = new Date(cursor.toDateString() + 'T' + formData.endTime);
+            requestedInstances.push({ start: s, end: e });
+            cursor.setDate(cursor.getDate() + 1);
+            occurrences++;
+          }
+          if (!endCursor && formData.endType === 'occurrences' && occurrences >= maxOcc) break;
+        }
+
+        // Check each requested instance against active bookings (including recurring instances)
+        for (const inst of requestedInstances) {
+          // capacity check for each instance
+          if ((room.capacity || 0) > 0 && allParticipants.length > room.capacity) {
+            setError(`Room capacity exceeded for one of the recurring instances (capacity: ${room.capacity}).`);
+            return;
+          }
+
+          for (const b of activeBookings) {
+            if (!b.recurring) {
+              const exStart = new Date(b.date + 'T' + (b.startTime || '00:00'));
+              const exEnd = new Date(b.date + 'T' + (b.endTime || '00:00'));
+              if (rangesOverlap(exStart, exEnd, inst.start, inst.end)) {
+                setError('Requested recurring instances conflict with existing bookings.');
+                return;
+              }
+            } else {
+              const instances = generateRecurringInstances(b, formData.recurringEndDate);
+              for (const eb of instances) {
+                if (rangesOverlap(eb.start, eb.end, inst.start, inst.end)) {
+                  setError('Requested recurring instances conflict with existing recurring bookings.');
+                  return;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // No conflicts: submit booking
       const response = await fetch("http://localhost:3000/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingSubmissionData),
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const savedBooking = await response.json();
       console.log("Booking saved successfully:", savedBooking);
-      
+
       alert("Booking submitted successfully!");
       onClose(false);
     } catch (err) {
       console.error("Error saving booking:", err);
-      setError("Failed to save booking. Please try again.");
+      setError(err instanceof Error ? err.message : String(err) || "Failed to save booking. Please try again.");
     }
   };
 
@@ -265,7 +524,24 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
       <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
         <h2 className="modal-title">Booking Details</h2>
 
-        {error && <div style={{ color: 'red', marginBottom: 12, textAlign: 'center' }}>{error}</div>}
+        {error && (
+          <div style={{ color: 'red', marginBottom: 12, textAlign: 'center' }}>
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>{error}</div>
+            {conflicts && conflicts.length > 0 && (
+              <div style={{ maxHeight: 140, overflowY: 'auto', padding: 8, background: '#fff5f5', borderRadius: 8, marginTop: 8, border: '1px solid #f2caca' }}>
+                <div style={{ color: '#8b1c1c', fontWeight: 700, marginBottom: 6 }}>Conflicting booking(s):</div>
+                <ul style={{ margin: 0, paddingLeft: 16 }}>
+                  {conflicts.map((c, i) => (
+                    <li key={i} style={{ marginBottom: 6, color: '#4a2e1f' }}>
+                      <span style={{ fontWeight: 700, color: '#8b1c1c' }}>ID:</span> {String(c.id)} — <span style={{ fontWeight: 600 }}>{c.start.toDateString()}</span> <span style={{ color: '#6b4a3a' }}>{c.start.toTimeString().slice(0,5)} - {c.end.toTimeString().slice(0,5)}</span>
+                      {c.reason && <div style={{ fontSize: 12, color: '#6b4a3a' }}>{c.reason}</div>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
 
         <form className="booking-form" onSubmit={handleSubmit}>
           {/* Required Amenities Display */}

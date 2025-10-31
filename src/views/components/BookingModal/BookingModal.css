@@ -10,6 +10,7 @@
   align-items: center; /* Center vertically */
   z-index: 999;
   overflow-y: auto;
+  overflow-x: hidden; /* prevent horizontal scrolling */
   padding: 40px 20px; /* Space from top/bottom/sides */
   box-sizing: border-box;
 }
@@ -23,6 +24,7 @@
   max-height: calc(100vh - 120px); /* Leave 120px margin (60px top + 60px bottom) */
   min-height: 200px;
   overflow-y: auto;
+  overflow-x: hidden; /* keep modal content from causing horizontal scroll */
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
   font-family: "Segoe UI", sans-serif;
   position: relative;
@@ -65,12 +67,14 @@
 .form-row {
   display: flex;
   gap: 20px;
+  flex-wrap: wrap; /* allow fields to wrap to next line instead of overflowing */
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0; /* allow flex children to shrink properly */
 }
 
 .form-group label {
@@ -89,6 +93,8 @@
   border-bottom: 3px solid #b5805c;
   color: #4a2e1f;
   background-color: #fff;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .participant-input input {
