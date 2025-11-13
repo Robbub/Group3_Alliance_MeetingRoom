@@ -95,27 +95,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
   const [searchTerm, setSearchTerm] = useState("");
   const [showParticipantDropdown, setShowParticipantDropdown] = useState(false);
 
-  // Fetch participants from db.json
-  useEffect(() => {
-    fetch("http://localhost:3000/participants")
-      .then((response) => response.json())
-      .then((data) => {
-        // Handle both array format and object format
-        const participantNames = Array.isArray(data) 
-          ? data.map((p: any) => p.name || p).filter(name => name && typeof name === 'string')
-          : [];
-        setAvailableParticipants(participantNames);
-      })
-      .catch((error) => {
-        console.error("Error fetching participants:", error);
-        // Fallback participants if server is down
-        setAvailableParticipants([
-          "John Doe", "Jane Smith", "Alice Johnson", "Bob Brown", 
-          "Carol White", "David Wilson", "Emma Davis", "Frank Miller"
-        ]);
-      });
-  }, []);
-
   // Set initial days of week when frequency changes to weekly
   useEffect(() => {
     if (formData.frequency === 'weekly' && formData.recurringStartDate) {
@@ -126,6 +105,58 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
       }));
     }
   }, [formData.frequency, formData.recurringStartDate]);
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        // Fetch users with 'user' role only (excluding admin and super admin)
+        const response = await fetch("https://localhost:3150/api/User/GetUsersByRole/user");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch participants: ${response.status}`);
+        }
+        const participantsData = await response.json();
+        console.log('Fetched participants:', participantsData);
+        
+        // Extract names from user objects - use the Name field which combines first and last name
+        const participantNames = participantsData
+          .filter((user: any) => user.name && user.name.trim()) // Only users with valid names
+          .map((user: any) => user.name);
+        
+        setAvailableParticipants(participantNames);
+      } catch (error) {
+        console.error("Error fetching participants:", error);
+        // Try alternative endpoint as fallback
+        try {
+          const fallbackResponse = await fetch("https://localhost:3150/api/User/GetAllUsers");
+          if (fallbackResponse.ok) {
+            const allUsers = await fallbackResponse.json();
+            // Filter only users with role "user"
+            const userRoleOnly = allUsers.filter((user: any) => user.role === "user");
+            const participantNames = userRoleOnly
+              .filter((user: any) => user.name && user.name.trim())
+              .map((user: any) => user.name);
+            setAvailableParticipants(participantNames);
+          } else {
+            // Final fallback - use some of the actual names from your database
+            setAvailableParticipants([
+              "jack wang", "admin admin", "superadmin superadmin", 
+              "bruce wayne", "Jackson Geneva", "chad wick", "Helena Romance"
+            ]);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback fetch also failed:", fallbackError);
+          // Use names that match your database structure
+          setAvailableParticipants([
+            "jack wang", "admin admin", "superadmin superadmin", 
+            "bruce wayne", "Jackson Geneva", "chad wick", "Helena Romance"
+          ]);
+        }
+      }
+    };
+
+    fetchParticipants();
+  }, []);
+
 
   // Helper functions
   const calculateDuration = (start: string, end: string): string => {
@@ -196,69 +227,70 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    
-    const date = formData.recurring ? formData.recurringStartDate : formData.date;
-    if (!formData.roomName || !formData.floor || !date || !formData.startTime || !formData.endTime) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-    if (formData.endTime <= formData.startTime) {
-      setError("End time must be after start time.");
-      return;
-    }
-    
-    // Get current user
-    const currentUser = getCurrentUser();
-    console.log("Current user:", currentUser);
-    
-    // Add current user as organizer if not already in participants
-    const allParticipants = formData.participants.includes(currentUser) 
-      ? formData.participants 
-      : [currentUser, ...formData.participants];
-    
-    const bookingSubmissionData = {
-      roomId: room.id,
-      roomName: formData.roomName,
-      floor: formData.floor,
-      date: date,
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      purpose: formData.purpose,
-      participants: allParticipants,
-      organizer: currentUser, // Track who created the booking
-      recurring: formData.recurring,
-      frequency: formData.frequency,
-      recurringEndDate: formData.recurringEndDate,
-      daysOfWeek: formData.daysOfWeek,
-      image: room.image,
-      createdAt: new Date().toISOString(),
-    };
-    
-    console.log("Booking data to submit:", bookingSubmissionData);
-    
-    try {
-      const response = await fetch("http://localhost:3000/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingSubmissionData),
-      });
+      e.preventDefault();
+      setError("");
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const date = formData.recurring ? formData.recurringStartDate : formData.date;
+      if (!formData.roomName || !formData.floor || !date || !formData.startTime || !formData.endTime) {
+        setError("Please fill in all required fields.");
+        return;
+      }
+      if (formData.endTime <= formData.startTime) {
+        setError("End time must be after start time.");
+        return;
       }
       
-      const savedBooking = await response.json();
-      console.log("Booking saved successfully:", savedBooking);
+      const currentUser = getCurrentUser();
+      const allParticipants = formData.participants.includes(currentUser) 
+        ? formData.participants 
+        : [currentUser, ...formData.participants];
       
-      alert("Booking submitted successfully!");
-      onClose(false);
-    } catch (err) {
-      console.error("Error saving booking:", err);
-      setError("Failed to save booking. Please try again.");
-    }
-  };
+      // SIMPLE: Just send participant names as strings, NOT UserViewModel objects
+      const bookingSubmissionData = {
+        RoomId: room.id,
+        RoomName: room.name, 
+        Floor: room.floor,   
+        Date: date,
+        StartTime: formData.startTime,
+        EndTime: formData.endTime,
+        Purpose: formData.purpose || "Meeting",
+        Organizer: currentUser,
+        Recurring: formData.recurring,
+        Frequency: formData.frequency || null,
+        RecurringEndDate: formData.recurringEndDate || null,
+        DaysOfWeek: formData.daysOfWeek && formData.daysOfWeek.length > 0 
+          ? formData.daysOfWeek 
+          : null,
+        Image: room.image,
+        Participants: allParticipants // Just send names as strings
+      };
+      
+      try {
+        console.log("Submitting booking data:", bookingSubmissionData);
+        
+        const response = await fetch("https://localhost:3150/api/Booking/AddBooking", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(bookingSubmissionData),
+        });
+        
+        const responseText = await response.text();
+        console.log("Response status:", response.status);
+        console.log("Response text:", responseText);
+        
+        if (!response.ok) {
+          throw new Error(responseText || "Failed to save booking");
+        }
+        
+        alert("Booking submitted successfully!");
+        onClose(false);
+      } catch (err) {
+        console.error("Error saving booking:", err);
+        setError(err instanceof Error ? err.message : "Failed to save booking.");
+      }
+    };
 
   return (
     <div className="modal-overlay" onClick={() => onClose(true)}>
@@ -289,57 +321,58 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
             </div>
           )}
 
-          {/* Floor Number */}
-          <div className="form-group full-width">
-            <label>Floor Number</label>
-            <select
-              value={formData.floor}
-              onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
-            >
-              <option value="6th Floor">6th Floor</option>
-              <option value="7th Floor">7th Floor</option>
-              <option value="8th Floor">8th Floor</option>
-            </select>
-          </div>
-
-          {/* Room Name */}
-          <div className="form-group full-width">
-            <label>Room Name</label>
-            <select
-              value={formData.roomName}
-              onChange={(e) =>
-                setFormData({ ...formData, roomName: e.target.value })
-              }
-            >
-              <option value="Board Room">Board Room</option>
-              <option value="Innovation Hub">Innovation Hub</option>
-              <option value="Strategy Room">Strategy Room</option>
-              <option value="Collaboration Space">Collaboration Space</option>
-              <option value="Executive Suite">Executive Suite</option>
-            </select>
-          </div>
-
-          {/* Date & Time */}
+          {/* Floor Number and Room Name Row */}
           <div className="form-row">
             <div className="form-group">
-              <label>Date</label>
-              <input
-                type="date"
-                value={formData.recurring ? formData.recurringStartDate : formData.date}
-                onChange={(e) =>
-                  formData.recurring
-                    ? setFormData({ ...formData, recurringStartDate: e.target.value })
-                    : setFormData({ ...formData, date: e.target.value })
-                }
-              />
+              <label>Floor Number</label>
+              <select
+                value={formData.floor}
+                onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
+              >
+                <option value="6th Floor">6th Floor</option>
+                <option value="7th Floor">7th Floor</option>
+                <option value="8th Floor">8th Floor</option>
+              </select>
             </div>
+            <div className="form-group">
+              <label>Room Name</label>
+              <select
+                value={formData.roomName}
+                onChange={(e) =>
+                  setFormData({ ...formData, roomName: e.target.value })
+                }
+              >
+                <option value="Board Room">Board Room</option>
+                <option value="Innovation Hub">Innovation Hub</option>
+                <option value="Strategy Room">Strategy Room</option>
+                <option value="Collaboration Space">Collaboration Space</option>
+                <option value="Executive Suite">Executive Suite</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Date (full width) */}
+          <div className="form-group">
+            <label>Date</label>
+            <input
+              type="date"
+              value={formData.recurring ? formData.recurringStartDate : formData.date}
+              onChange={(e) =>
+                formData.recurring
+                  ? setFormData({ ...formData, recurringStartDate: e.target.value })
+                  : setFormData({ ...formData, date: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Start Time and End Time Row */}
+          <div className="form-row">
             <div className="form-group">
               <label>Start Time</label>
               <input
                 type="time"
                 value={formData.startTime}
                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                style={{ padding: '10px', borderRadius: '6px', border: '2px solid #ddb892' }}
               />
             </div>
             <div className="form-group">
@@ -348,87 +381,86 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
                 type="time"
                 value={formData.endTime}
                 onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                style={{ padding: '10px', borderRadius: '6px', border: '2px solid #ddb892' }}
               />
             </div>
           </div>
 
-          {/* Purpose & Participants */}
-          <div className="form-row">
-            <div className="form-group">
-              <label>Purpose of the booking</label>
+          {/* Purpose (full width) */}
+          <div className="form-group">
+            <label>Purpose of the booking</label>
+            <input
+              type="text"
+              placeholder="Enter the purpose of this meeting"
+              value={formData.purpose}
+              onChange={(e) =>
+                setFormData({ ...formData, purpose: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Add Participants (full width) */}
+          <div className="form-group">
+            <label>Add Participants</label>
+            <div className="participant-input" style={{ position: 'relative' }}>
               <input
                 type="text"
-                placeholder="Text"
-                value={formData.purpose}
-                onChange={(e) =>
-                  setFormData({ ...formData, purpose: e.target.value })
-                }
+                placeholder="Search and select participants..."
+                value={formData.participantInput}
+                onChange={handleParticipantInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addParticipant();
+                  }
+                }}
+                onFocus={() => setShowParticipantDropdown(searchTerm.length > 0)}
+                onBlur={() => {
+                  // Delay hiding dropdown to allow clicks
+                  setTimeout(() => setShowParticipantDropdown(false), 200);
+                }}
               />
-            </div>
-            <div className="form-group">
-              <label>Add Participants</label>
-              <div className="participant-input" style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  placeholder="Search and select participants"
-                  value={formData.participantInput}
-                  onChange={handleParticipantInputChange}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addParticipant();
-                    }
-                  }}
-                  onFocus={() => setShowParticipantDropdown(searchTerm.length > 0)}
-                  onBlur={() => {
-                    // Delay hiding dropdown to allow clicks
-                    setTimeout(() => setShowParticipantDropdown(false), 200);
-                  }}
-                />
-                
-                {/* Participant Dropdown */}
-                {showParticipantDropdown && filteredParticipants.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
-                    backgroundColor: 'white',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    maxHeight: '150px',
-                    overflowY: 'auto',
-                    zIndex: 1000,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                  }}>
-                    {filteredParticipants.map((participant, index) => (
-                      <div
-                        key={index}
-                        onClick={() => addParticipant(participant)}
-                        style={{
-                          padding: '8px 12px',
-                          cursor: 'pointer',
-                          borderBottom: index < filteredParticipants.length - 1 ? '1px solid #f0f0f0' : 'none',
-                          fontSize: '14px'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                      >
-                        {participant}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Selected Participants */}
-                <div className="selected-participants">
-                  {formData.participants.map((p, idx) => (
-                    <span className="participant-tag" key={idx}>
-                      {p} <span onClick={() => removeParticipant(p)}>×</span>
-                    </span>
+              
+              {/* Participant Dropdown */}
+              {showParticipantDropdown && filteredParticipants.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'white',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  maxHeight: '150px',
+                  overflowY: 'auto',
+                  zIndex: 1000,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}>
+                  {filteredParticipants.map((participant, index) => (
+                    <div
+                      key={index}
+                      onClick={() => addParticipant(participant)}
+                      style={{
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                        borderBottom: index < filteredParticipants.length - 1 ? '1px solid #f0f0f0' : 'none',
+                        fontSize: '14px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      {participant}
+                    </div>
                   ))}
                 </div>
+              )}
+
+              {/* Selected Participants */}
+              <div className="selected-participants">
+                {formData.participants.map((p, idx) => (
+                  <span className="participant-tag" key={idx}>
+                    {p} <span onClick={() => removeParticipant(p)}>×</span>
+                  </span>
+                ))}
               </div>
             </div>
           </div>

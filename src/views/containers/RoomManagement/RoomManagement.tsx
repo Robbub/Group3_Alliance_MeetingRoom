@@ -1,242 +1,312 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { FaTrashAlt, FaWrench, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { Header } from '../../components/Header/Header';
 import './RoomManagement.css';
 import AddRoomModal from '../../components/AddRoomModal/AddRoomModal';
 import EditRoomModal from '../../components/EditRoomModal/EditRoomModal';
 
+interface Amenity {
+  id: number;
+  name: string;
+  description: string;
+}
+
 interface Room {
   id: number;
   roomName: string;
   floorNumber: string;
-  amenities: string[];
+  amenities: Amenity[]; // Change to Amenity object array
   capacity: number;
   coverPhoto: string;
   available: boolean;
 }
 
+const API_BASE_URL = "https://localhost:3150/api/Room"; // Backend API base URL
+const AMENITIES_API_URL = `${API_BASE_URL}/GetAmenities`;
+
 const RoomManagement: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
-  const [sortKey, setSortKey] = useState<keyof Room>('roomName');
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState<'roomName' | 'floorNumber' | 'capacity'>('roomName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const roomsPerPage = 7;
+  const [roomsPerPage] = useState(7); // Match user management
+  const [allAmenities, setAllAmenities] = useState<Amenity[]>([]); // Store all amenities for dropdown
 
-  // Fetch rooms on mount
+  // Fetch all amenities on component mount
   useEffect(() => {
-    fetchRooms();
+    const fetchAmenities = async () => {
+      try {
+        const response = await fetch(AMENITIES_API_URL);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch amenities: ${response.status}`);
+        }
+        const data: Amenity[] = await response.json();
+        setAllAmenities(data);
+      } catch (error) {
+        console.error("Error fetching amenities:", error);
+        alert("Failed to load amenities. Please try again later.");
+      }
+    };
+
+    fetchAmenities();
   }, []);
 
-  const fetchRooms = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/rooms");
-      if (!response.ok) throw new Error('Failed to fetch rooms');
-      const data = await response.json();
-      setRooms(data);
-    } catch (error) {
-      console.error("Error fetching rooms:", error);
-      setRooms([]);
-    }
-  };
+  // Fetch rooms on component mount and when amenities are loaded
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/GetRooms`); // Assuming your controller has this endpoint
+        if (!response.ok) {
+          throw new Error(`Failed to fetch rooms: ${response.status}`);
+        }
+        const data: Room[] = await response.json();
+        // Map string amenities to objects if the API returns them as strings
+        // If the API returns objects, this step might be unnecessary
+        const roomsWithObjectAmenities = data.map(room => ({
+          ...room,
+          amenities: room.amenities.map(amenity => {
+            // If amenity is a string, find the corresponding object from allAmenities
+            if (typeof amenity === 'string') {
+              return allAmenities.find(a => a.name === amenity) || { id: 0, name: amenity, description: '' };
+            }
+            // If amenity is already an object, return it as is
+            return amenity;
+          })
+        }));
+        setRooms(roomsWithObjectAmenities);
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+        setRooms([]);
+      }
+    };
 
-  // Handle adding a new room
-  const handleAddRoom = async (newRoom: Omit<Room, 'id'>) => {
-    try {
-      console.log('Adding room:', newRoom);
-      
-      const response = await fetch("http://localhost:3000/rooms", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRoom),
-      });
-      
-      if (!response.ok) throw new Error("Failed to add room");
-      
-      const addedRoom = await response.json();
-      console.log('Room added successfully:', addedRoom);
-      
-      // Update local state with the room that has an ID from server
-      setRooms(prev => [...prev, addedRoom]);
-      
-      // Trigger event for Browse component to refresh
-      window.dispatchEvent(new CustomEvent('roomsUpdated'));
-      
-      // Show success message only once
-      alert("Room added successfully!");
-      
-    } catch (error) {
-      console.error("Error adding room:", error);
-      alert("Failed to add room. Please try again.");
+    if (allAmenities.length > 0) { // Only fetch rooms after amenities are loaded
+      fetchRooms();
     }
+  }, [allAmenities]); // Dependency on allAmenities to refetch if needed
+
+  const handleAddRoom = async (newRoom: Omit<Room, 'id'>) => {
+      try {
+          console.log('Adding room:', newRoom);
+          // Extract amenity IDs
+          const amenityIds = newRoom.amenities.map(a => a.id); // Map to IDs
+          const response = await fetch(`${API_BASE_URL}/AddRoom`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                  ...newRoom,
+                  amenities: amenityIds // Send only the IDs to the backend
+              }),
+          });
+
+          if (!response.ok) {
+              const errorData = await response.text();
+              throw new Error(errorData || "Failed to add room");
+          }
+
+          const addedRoomData: { message: string } = await response.json();
+          alert(addedRoomData.message);
+
+          // Refetch rooms to get the updated list with the new room
+          const updatedResponse = await fetch(`${API_BASE_URL}/GetRooms`);
+          if (!updatedResponse.ok) {
+              throw new Error(`Failed to fetch rooms after add: ${updatedResponse.status}`);
+          }
+          const updatedRooms: Room[] = await updatedResponse.json();
+          setRooms(updatedRooms);
+          setShowAddModal(false);
+
+      } catch (error) {
+          console.error("Error adding room:", error);
+          alert(error instanceof Error ? error.message : "Failed to add room. Please try again.");
+      }
   };
 
   // Handle editing a room
   const handleEditRoom = async (updatedRoom: Room) => {
-    try {
-      const response = await fetch(`http://localhost:3000/rooms/${updatedRoom.id}`, {
-        method: "PUT", // Changed from PATCH to PUT for complete replacement
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedRoom),
-      });
-      
-      if (!response.ok) throw new Error("Failed to update room");
-      
-      // Update local state
-      setRooms(prev => prev.map(room => room.id === updatedRoom.id ? updatedRoom : room));
-      setShowEditModal(false);
-      setCurrentRoom(null);
-      
-      // Trigger event for Browse component to refresh
-      window.dispatchEvent(new CustomEvent('roomsUpdated'));
-      
-      alert("Room updated successfully!");
-    } catch (error) {
-      console.error("Error updating room:", error);
-      alert("Failed to update room. Please try again.");
-    }
+      try {
+          console.log('Updating room:', updatedRoom);
+          // Extract amenity IDs
+          const amenityIds = updatedRoom.amenities.map(a => a.id); // Map to IDs
+          const response = await fetch(`${API_BASE_URL}/UpdateRoom/${updatedRoom.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                  ...updatedRoom,
+                  amenities: amenityIds // Send only the IDs to the backend
+              }),
+          });
+
+          if (!response.ok) {
+              const errorData = await response.text();
+              throw new Error(errorData || "Failed to update room");
+          }
+
+          const updatedRoomData: { message: string } = await response.json();
+          alert(updatedRoomData.message);
+
+          // Update local state optimistically or refetch
+          setRooms(prev => prev.map(room => room.id === updatedRoom.id ? updatedRoom : room));
+          setShowEditModal(false);
+          setCurrentRoom(null);
+
+      } catch (error) {
+          console.error("Error updating room:", error);
+          alert(error instanceof Error ? error.message : "Failed to update room. Please try again.");
+      }
   };
 
   // Handle deleting a room
   const handleDeleteRoom = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this room?")) {
-      try {
-        console.log(`Deleting room with ID: ${id}`);
-        
-        const response = await fetch(`http://localhost:3000/rooms/${id}`, {
-          method: "DELETE",
-        });
-        
-        console.log(`Delete response status: ${response.status}`);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to delete room: ${response.status}`);
-        }
-        
-        // Update local state
-        setRooms(prev => prev.filter(room => room.id !== id));
-        
-        // Trigger event for Browse component to refresh
-        window.dispatchEvent(new CustomEvent('roomsUpdated'));
-        
-        alert("Room deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting room:", error);
-        alert("Failed to delete room. Please try again.");
+    if (!window.confirm("Are you sure you want to delete this room?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/DeleteRoom/${id}`, { // Assuming your controller has this endpoint
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || `Failed to delete room: ${response.status}`);
       }
+
+      const deletedRoomData: { message: string } = await response.json();
+      alert(deletedRoomData.message);
+
+      // Update local state
+      setRooms(prev => prev.filter(room => room.id !== id));
+
+    } catch (error) {
+      console.error("Error deleting room:", error);
+      alert(error instanceof Error ? error.message : "Failed to delete room. Please try again.");
     }
   };
 
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value.trim().toLowerCase());
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when searching
   };
 
   // Handle sorting
-  const handleSort = (key: keyof Room) => {
-    if (key === sortKey) {
-      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+  const handleSort = (key: 'roomName' | 'floorNumber' | 'capacity') => {
+    if (sortKey === key) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortKey(key);
       setSortDirection('asc');
     }
-    setCurrentPage(1);
   };
 
   // Filter and sort rooms
-  const filteredRooms = rooms.filter(room => {
-    return (
+  const filteredAndSortedRooms = useMemo(() => {
+    let filtered = rooms.filter(room =>
       room.roomName.toLowerCase().includes(search) ||
       room.floorNumber.toLowerCase().includes(search) ||
-      room.amenities.some(amenity => amenity.toLowerCase().includes(search)) ||
-      room.capacity.toString().includes(search)
+      room.amenities.some(a => a.name.toLowerCase().includes(search)) // Check amenities too
     );
-  });
 
-  const sortedRooms = [...filteredRooms].sort((a, b) => {
-    const aValue = a[sortKey];
-    const bValue = b[sortKey];
+    filtered.sort((a, b) => {
+      if (sortKey === 'roomName') {
+        return sortDirection === 'asc' ? a.roomName.localeCompare(b.roomName) : b.roomName.localeCompare(a.roomName);
+      } else if (sortKey === 'floorNumber') {
+        return sortDirection === 'asc' ? a.floorNumber.localeCompare(b.floorNumber) : b.floorNumber.localeCompare(a.floorNumber);
+      } else if (sortKey === 'capacity') {
+        return sortDirection === 'asc' ? a.capacity - b.capacity : b.capacity - a.capacity;
+      }
+      return 0;
+    });
 
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc'
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
-    }
-
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-    }
-
-    return 0;
-  });
+    return filtered;
+  }, [rooms, search, sortKey, sortDirection]);
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(sortedRooms.length / roomsPerPage));
-  const indexOfLastRoom = currentPage * roomsPerPage;
-  const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
-  const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
+  const totalPages = Math.ceil(filteredAndSortedRooms.length / roomsPerPage);
+  const paginatedRooms = filteredAndSortedRooms.slice(
+    (currentPage - 1) * roomsPerPage,
+    currentPage * roomsPerPage
+  );
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  // Icons for sorting
+  const getSortIcon = (key: 'roomName' | 'floorNumber' | 'capacity') => {
+    if (sortKey === key) {
+      return sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />;
+    }
+    return null;
+  };
 
   return (
     <div className="room-management-page">
       <Header />
       <div className="room-management-content">
         <div className="room-management-header">
-          <h1 className="manage-rooms-heading">Manage Rooms</h1>
-          <div className="search-and-add">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search rooms..."
-              value={search}
-              onChange={handleSearch}
-            />
-            <button 
-              className="add-room-btn" 
-              onClick={() => setShowAddModal(true)}
-            >
-              Add New Room
-            </button>
-          </div>
+          <h1 className="room-management-title">Room Management</h1>
+          <button className="add-room-btn" onClick={() => setShowAddModal(true)}>
+            Add Room
+          </button>
         </div>
 
-        <div className="room-table-wrapper">
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Search rooms..."
+            value={search}
+            onChange={handleSearch}
+            className="search-input"
+          />
+        </div>
+
+        <div className="table-container">
           <table className="room-table">
             <thead>
               <tr>
-                <th onClick={() => handleSort('roomName')} className="sortable">
-                  Room Name {sortKey === 'roomName' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
-                <th onClick={() => handleSort('floorNumber')} className="sortable">
-                  Floor {sortKey === 'floorNumber' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
-                <th onClick={() => handleSort('capacity')} className="sortable">
-                  Capacity {sortKey === 'capacity' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
-                <th>Amenities</th>
-                <th>Actions</th>
+                {/* Define explicit widths for each column */}
+                <th style={{ width: '20%' }}>Room Name {getSortIcon('roomName')}</th>
+                <th style={{ width: '10%' }}>Floor Number {getSortIcon('floorNumber')}</th>
+                <th style={{ width: '15%' }}>Photo</th>
+                <th style={{ width: '10%' }}>Capacity {getSortIcon('capacity')}</th>
+                <th style={{ width: '30%' }}>Amenities</th>
+                <th style={{ width: '15%' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {currentRooms.map(room => (
+              {paginatedRooms.map((room) => (
                 <tr key={room.id}>
                   <td>{room.roomName}</td>
                   <td>{room.floorNumber}</td>
+                  <td>
+                    {room.coverPhoto ? (
+                      <img src={room.coverPhoto} alt={room.roomName} className="room-photo" />
+                    ) : (
+                      <div className="room-photo-placeholder">No Image</div>
+                    )}
+                  </td>
                   <td>{room.capacity}</td>
                   <td>
                     <div className="amenities-list">
                       {room.amenities.map((amenity, i) => (
-                        <span key={i} className="amenity-badge">{amenity}</span>
+                        <span key={i} className="amenity-badge">
+                          {amenity.name}
+                        </span>
                       ))}
                     </div>
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button 
-                        className="action-btn edit" 
+                      <button
+                        className="action-btn edit"
                         onClick={() => {
                           setCurrentRoom(room);
                           setShowEditModal(true);
@@ -245,8 +315,8 @@ const RoomManagement: React.FC = () => {
                       >
                         <FaWrench />
                       </button>
-                      <button 
-                        className="action-btn delete" 
+                      <button
+                        className="action-btn delete"
                         onClick={() => handleDeleteRoom(room.id)}
                         title="Delete Room"
                       >
@@ -263,43 +333,38 @@ const RoomManagement: React.FC = () => {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination">
-            <button 
-              className="pagination-btn" 
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} 
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
             >
-              ‹
+              Previous
             </button>
-            
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`page-number ${currentPage === i + 1 ? "active" : ""}`}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </button>
-            ))}
-            
-            <button 
-              className="pagination-btn" 
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} 
+            <span className="page-info">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
             >
-              ›
+              Next
             </button>
           </div>
         )}
 
         {/* Modals */}
-        <AddRoomModal
-          show={showAddModal}
-          onHide={() => setShowAddModal(false)}
-          onSave={handleAddRoom}
-          existingRooms={rooms}
-        />
+        {showAddModal && (
+          <AddRoomModal
+            show={showAddModal}
+            onHide={() => setShowAddModal(false)}
+            onSave={handleAddRoom}
+            existingRooms={rooms}
+            allAmenities={allAmenities}
+          />
+        )}
 
-        {currentRoom && (
+        {showEditModal && currentRoom && (
           <EditRoomModal
             show={showEditModal}
             onHide={() => {
@@ -308,6 +373,7 @@ const RoomManagement: React.FC = () => {
             }}
             room={currentRoom}
             onSave={handleEditRoom}
+            allAmenities={allAmenities}
           />
         )}
       </div>

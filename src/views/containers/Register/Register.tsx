@@ -7,6 +7,7 @@ import "./Register.css";
 export const Register = () => {
   const [formData, setFormData] = useState({
     username: "",
+    email: "", 
     password: "",
     retypePassword: "",
     firstName: "",
@@ -22,24 +23,33 @@ export const Register = () => {
       return;
     }
 
-    try {
-      await fetch("http://localhost:3000/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-          firstName: formData.firstName,
-          lastName: formData.lastName
-        }),
-      });
-
-      alert("Registration successful!");
-      navigate(PATHS.LOGIN.path);
-    } catch (error) {
-      console.error("Error registering user:", error);
-      alert("Failed to register. Please try again.");
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address!");
+      return;
     }
+
+    const response = await fetch("https://localhost:3150/api/Account/Register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        UserId: formData.username,    // Username only
+        Password: formData.password, 
+        FirstName: formData.firstName, 
+        LastName: formData.lastName,  
+        Email: formData.email || ""   // Separate email field
+      }),
+    });
+
+    if (!response.ok) {
+      const msg = await response.text();
+      alert(msg || "Failed to register.");
+      return;
+    }
+
+    alert("Registration successful!");
+    navigate(PATHS.LOGIN.path);
   };
 
   return (
@@ -49,8 +59,10 @@ export const Register = () => {
         <div className="register-form-container">
           <h1 className="register-title">CREATE AN ACCOUNT</h1>
           <form className="register-form" onSubmit={handleSubmit}>
+            
+            {/* Username Field - SEPARATE from email */}
             <div className="form-group">
-              <label htmlFor="username">Username/Email</label>
+              <label htmlFor="username">Username</label>
               <input
                 type="text"
                 id="username"
@@ -58,7 +70,22 @@ export const Register = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, username: e.target.value })
                 }
-                placeholder="Enter your username or email address"
+                placeholder="Enter your username"
+                required
+              />
+            </div>
+
+            {/* Email Field - SEPARATE input */}
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                placeholder="Enter your email address"
                 required
               />
             </div>
@@ -106,6 +133,7 @@ export const Register = () => {
                 required
               />
             </div>
+            
             <div className="form-group">
               <label htmlFor="retypePassword">Re-type Password</label>
               <input
@@ -119,6 +147,7 @@ export const Register = () => {
                 required
               />
             </div>
+            
             <button type="submit" className="register-button">
               Sign Up
             </button>

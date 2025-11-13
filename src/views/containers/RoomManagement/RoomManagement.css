@@ -30,6 +30,21 @@
   margin: 0;
 }
 
+.add-room-btn {
+  background-color: #ff9900;
+  color: #1a1a1a;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.add-room-btn:hover {
+  background-color: #e68a00;
+}
+
 .search-and-add {
   display: flex;
   gap: 30px;
@@ -44,6 +59,7 @@
   background-color: #fef8f2;
   color: #5c3b22;
   width: 300px;
+  margin-bottom: 20px; 
 }
 
 .add-room-btn {
@@ -62,6 +78,7 @@
 .room-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .room-table th,
@@ -83,6 +100,38 @@
 .room-table td {
   vertical-align: middle;
   font-size: 14px;
+}
+
+.room-photo {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e1c5a5;
+}
+
+/* Update the table cell for photo column */
+.room-table td {
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+/* Specific styling for photo column */
+.room-table td:nth-child(3) {
+  width: 15%; /* Match the header width */
+  text-align: left; /* <-- This is the key change */
+  padding: 12px 10px;
+}
+
+/* Style the image inside the photo cell */
+.room-table td:nth-child(3) img {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e1c5a5;
+  /* Optional: Add a small margin to create some space from the left edge */
+  margin-right: 10px;
 }
 
 .action-buttons {

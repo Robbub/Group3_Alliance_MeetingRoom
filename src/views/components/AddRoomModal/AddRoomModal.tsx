@@ -1,43 +1,63 @@
-import React, { useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import './AddRoomModal.css'; // Make sure to create this CSS file
+import React, { useState, useEffect } from 'react';
+import { FaTimes, FaChevronDown } from 'react-icons/fa';
+import './AddRoomModal.css';
+
+interface Amenity {
+  id: number;
+  name: string;
+  description: string;
+}
 
 interface AddRoomModalProps {
   show: boolean;
   onHide: () => void;
-  onSave: (room: Room) => void;
-  existingRooms: Room[]; 
+  onSave: (room: Omit<Room, 'id'>) => void;
+  existingRooms: Room[];
+  allAmenities: Amenity[]; // Receive all amenities
 }
 
 interface Room {
   id: number;
   roomName: string;
   floorNumber: string;
-  amenities: string[];
+  amenities: Amenity[]; // Use Amenity object array
   capacity: number;
   coverPhoto: string;
   available: boolean;
 }
 
-const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, existingRooms }) => {
+const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, existingRooms, allAmenities }) => {
   const [roomName, setRoomName] = useState('');
   const [floorNumber, setFloorNumber] = useState('1');
   const [capacity, setCapacity] = useState('1');
-  const [amenities, setAmenities] = useState<string[]>([]);
-  const [tempAmenity, setTempAmenity] = useState('');
+  const [selectedAmenityIds, setSelectedAmenityIds] = useState<number[]>([]); // Store selected amenity IDs
   const [coverPhoto, setCoverPhoto] = useState('');
-  const [coverPhotoFile, setCoverPhotoFile] = useState<File | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Update selected amenities when allAmenities changes
+  useEffect(() => {
+    // Reset selections if needed
+  }, [allAmenities]);
 
-  const handleAddAmenity = () => {
-    if (tempAmenity.trim() && amenities.length < 5) {
-      setAmenities([...amenities, tempAmenity.trim()]);
-      setTempAmenity('');
-    }
+  const handleAmenityToggle = (amenityId: number) => {
+    setSelectedAmenityIds(prev =>
+      prev.includes(amenityId)
+        ? prev.filter(id => id !== amenityId)
+        : [...prev, amenityId]
+    );
   };
 
-  const handleRemoveAmenity = (amenity: string) => {
-    setAmenities(amenities.filter(a => a !== amenity));
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setCoverPhoto(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSave = async () => {
@@ -45,45 +65,40 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
       alert('Please enter a room name');
       return;
     }
-
-    if (amenities.length === 0) {
-      alert('Please add at least one amenity');
+    if (selectedAmenityIds.length === 0) {
+      alert('Please select at least one amenity');
       return;
     }
 
     // Check for duplicate room names
-    const isDuplicate = existingRooms.some(room => 
+    const isDuplicate = existingRooms.some(room =>
       room.roomName.toLowerCase() === roomName.trim().toLowerCase()
     );
-
     if (isDuplicate) {
       alert('A room with this name already exists. Please choose a different name.');
       return;
     }
 
+    // Convert selected IDs back to Amenity objects for the parent component
+    const selectedAmenitiesObjects = allAmenities.filter(amenity => selectedAmenityIds.includes(amenity.id));
+
     const newRoom: Omit<Room, 'id'> = {
       roomName: roomName.trim(),
       floorNumber,
       capacity: parseInt(capacity),
-      amenities,
+      amenities: selectedAmenitiesObjects, // Pass the object array
       coverPhoto: coverPhoto || getDefaultImage(),
       available: true
     };
 
-    // Only pass data to parent, don't make API call here
-    onSave(newRoom as Room); // Parent will handle the API call and add the ID
-    
+    onSave(newRoom);
     // Reset form
     setRoomName('');
     setFloorNumber('1');
     setCapacity('1');
-    setAmenities([]);
-    setTempAmenity('');
+    setSelectedAmenityIds([]);
     setCoverPhoto('');
-    setCoverPhotoFile(null);
-    
     onHide();
-    // Remove the alert from here - parent will handle it
   };
 
   const getDefaultImage = () => {
@@ -92,29 +107,25 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
       "/assets/meeting-room7.png",
       "/assets/meeting-room4.png",
       "/assets/meeting-room5.jpg",
-      "/assets/meeting-room6.png"
+      "/assets/meeting-room6.png",
     ];
     return defaultImages[Math.floor(Math.random() * defaultImages.length)];
   };
-
-  const floorOptions = Array.from({ length: 17 }, (_, i) => (i + 1).toString());
-  const capacityOptions = Array.from({ length: 50 }, (_, i) => (i + 1).toString());
 
   if (!show) return null;
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <div className="main-header">
-            <div className="modal-header">
-                <p className="modal-title">Add new room</p>
-                <p className="modal-subtitle">Set up a new room for bookings.</p>
-            </div>
-            <div className="closeBtn">
-                <button className="btn-close" onClick={onHide}>
-                    <span className="close-icon">&times;</span>
-                </button>
-            </div>
+        {/* Modal Header */}
+        <div className="modal-header">
+          <div>
+            <h3 className="modal-title">Add room</h3>
+            <p className="modal-subtitle">Enter details to create a new room.</p>
+          </div>
+          <button className="btn-close" onClick={onHide}>
+            <FaTimes />
+          </button>
         </div>
         
         <div className="modal-body">
@@ -124,7 +135,6 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
               type="text"
               className="form-control"
               placeholder="e.g. Linear"
-              id="room-input"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
             />
@@ -138,8 +148,8 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
                 value={floorNumber}
                 onChange={(e) => setFloorNumber(e.target.value)}
               >
-                {floorOptions.map(floor => (
-                  <option key={floor} value={floor}>{floor}</option>
+                {Array.from({ length: 17 }, (_, i) => (i + 1).toString()).map(num => (
+                  <option key={num} value={num}>{num}</option>
                 ))}
               </select>
             </div>
@@ -151,8 +161,8 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
               >
-                {capacityOptions.map(capacity => (
-                  <option key={capacity} value={capacity}>{capacity}</option>
+                {Array.from({ length: 50 }, (_, i) => (i + 1).toString()).map(num => (
+                  <option key={num} value={num}>{num}</option>
                 ))}
               </select>
             </div>
@@ -188,64 +198,56 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
                 accept="image/*"
                 className="hidden-file-input" 
                 style={{ display: 'none' }}
-                onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        setCoverPhoto(event.target?.result as string);
-                    };
-                    reader.readAsDataURL(file);
-                    }
-                }}
+                onChange={handleImageUpload}
                 />
             </div>
-            </div>
+          </div>
 
           <div className="form-group">
             <label className="form-label">Amenities*</label>
-            <p className="form-hint">Add 1–5 keywords that describe this room's amenities.</p>
-            <div className="amenities-container">
-              {amenities.map((amenity, i) => (
-                <div key={i} className="amenity-badge">
-                  {amenity}
-                  <span className="amenity-remove" onClick={() => handleRemoveAmenity(amenity)}>
-                    <FaTimes />
-                  </span>
+            <p className="form-hint">Select amenities for this room.</p>
+            {/* Multi-Select Dropdown */}
+            <div className="multi-select-container">
+              <button
+                className="multi-select-button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                {selectedAmenityIds.length > 0 ? `${selectedAmenityIds.length} Selected` : 'Select Amenities'}
+                <FaChevronDown className={`chevron-icon ${isDropdownOpen ? 'rotate' : ''}`} />
+              </button>
+              {isDropdownOpen && (
+                <div className="multi-select-dropdown">
+                  <div className="multi-select-header">
+                    Select Amenities
+                  </div>
+                  {allAmenities.map(amenity => (
+                    <div
+                      key={amenity.id}
+                      className="multi-select-option"
+                      onClick={() => handleAmenityToggle(amenity.id)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedAmenityIds.includes(amenity.id)}
+                        readOnly
+                      />
+                      <span>{amenity.name}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-            {amenities.length < 5 && (
-              <div className="amenity-input-container">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. whiteboard, video conferencing"
-                  value={tempAmenity}
-                  onChange={(e) => setTempAmenity(e.target.value)}
-                />
-                <button 
-                  className="btn btn-outline"
-                  onClick={handleAddAmenity}
-                  disabled={!tempAmenity.trim()}
-                >
-                  Add
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
         <div className="modal-footer">
-          <button className="btn btn-outline" onClick={onHide}>
-            Cancel
-          </button>
-          <button 
+          <button className="btn btn-outline" onClick={onHide}>Cancel</button>
+          <button
             className="btn btn-primary"
             onClick={handleSave}
-            disabled={!roomName || amenities.length === 0}
+            disabled={!roomName || selectedAmenityIds.length === 0}
           >
-            Confirm
+            Add Room
           </button>
         </div>
       </div>

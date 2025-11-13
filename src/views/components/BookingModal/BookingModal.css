@@ -53,7 +53,7 @@
   font-weight: 600;
   color: #4a2e1f;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 20px !important;
 }
 
 .booking-form {
@@ -89,6 +89,9 @@
   border-bottom: 3px solid #b5805c;
   color: #4a2e1f;
   background-color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  height: 42px; /* Fixed height for all inputs */
 }
 
 .participant-input input {
@@ -97,6 +100,9 @@
   border: 2px solid #ddb892;
   border-radius: 6px;
   width: 100%;
+  box-sizing: border-box;
+  height: 42px; /* Match other inputs */
+  border-bottom: 3px solid #b5805c;
 }
 
 .selected-participants {

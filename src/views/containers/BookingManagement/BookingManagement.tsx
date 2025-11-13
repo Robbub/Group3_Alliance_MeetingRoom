@@ -39,22 +39,7 @@ export const BookingManagement = () => {
   const [endTime, setEndTime] = useState("15:00");
   const [meetingTitle, setMeetingTitle] = useState("");
 
-  const navigate = useNavigate();
-
-  // All possible amenities
-  const allAmenities = [
-    "Air-con",
-    "Whiteboard",
-    "Projector",
-    "Video Conferencing",
-    "Smart TV",
-    "Coffee Machine",
-    "Ergonomic Chairs",
-    "Standing Desks",
-    "Leather Chairs",
-    "Privacy Glass",
-    "Mini Fridge"
-  ];
+  const navigate = useNavigate();const [allAmenities, setAllAmenities] = useState<{ id: number; name: string; description: string }[]>([]);
 
   // Ref to track current selection in Week view
   const weekViewRef = useRef<{ start: Date | null; end: Date | null }>({ start: null, end: null });
@@ -594,7 +579,23 @@ export const BookingManagement = () => {
     return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
   }, [isDragging, dragStart, selectedRange, draggedDayIndex]);
 
+  useEffect(() => {
+    const fetchAmenities = async () => {
+      try {
+        const response = await fetch('https://localhost:3150/api/Room/GetAmenities'); // Adjust URL if needed
+        if (!response.ok) {
+          throw new Error(`Failed to fetch amenities: ${response.status}`);
+        }
+        const data = await response.json();
+        setAllAmenities(data);
+      } catch (error) {
+        console.error("Error fetching amenities:", error);
+        // Handle error appropriately, maybe set an error state or show a message
+      }
+    };
 
+    fetchAmenities();
+  }, []);
 
   return (
     <>
@@ -806,19 +807,19 @@ export const BookingManagement = () => {
             <h3 style={{ marginBottom: "10px", color: "#64442F", fontWeight: "bold" }}>Required Amenities</h3>
             <div style={{ maxHeight: "200px", overflowY: "auto", marginBottom: "20px" }}>
               {allAmenities.map((amenity) => (
-                <label key={amenity} style={{ display: "block", margin: "6px 0" }}>
+                <label key={amenity.id} style={{ display: "block", margin: "6px 0" }}>
                   <input
                     type="checkbox"
-                    checked={selectedAmenities.includes(amenity)}
+                    checked={selectedAmenities.includes(amenity.name)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedAmenities([...selectedAmenities, amenity]);
+                        setSelectedAmenities([...selectedAmenities, amenity.name]);
                       } else {
-                        setSelectedAmenities(selectedAmenities.filter((a) => a !== amenity));
+                        setSelectedAmenities(selectedAmenities.filter((a) => a !== amenity.name));
                       }
                     }}
                   />
-                  <span style={{ marginLeft: "10px" }}>{amenity}</span>
+                  <span style={{ marginLeft: "10px" }}>{amenity.name}</span>
                 </label>
               ))}
             </div>
