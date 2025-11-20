@@ -1,6 +1,5 @@
 export * from "./Homepage/Homepage";
 export * from "./NotFound";
-export * from "./Dashboard";
 export * from "./Login";
 export * from "./Logout";
 export * from "./Register/Register";

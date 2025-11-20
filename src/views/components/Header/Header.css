@@ -1,12 +1,18 @@
 .header {
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 15px 20px;
   background-color: #EDE0D4;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 100%; 
   box-sizing: border-box; 
   gap: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 100px;
 }
 
 .logo {

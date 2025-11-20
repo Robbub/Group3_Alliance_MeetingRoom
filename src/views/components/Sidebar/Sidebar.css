@@ -1,15 +1,23 @@
 .sidebar {
   width: 260px;
-  height: 100vh;
+  min-width: 260px;
+  height: calc(100vh - 100px);
   background-color: #64442F;
   color: white;
   position: fixed;
   left: 0;
-  top: 0;
+  top: 100px;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  transition: width 0.3s ease, min-width 0.3s ease;
+  z-index: 999;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+  min-width: 80px;
 }
 
 .sidebar-header {
@@ -23,16 +31,21 @@
   gap: 15px;
 }
 
+.sidebar.collapsed .sidebar-logo {
+  justify-content: center;
+}
+
 .logo-icon {
   width: 45px;
   height: 45px;
+  min-width: 45px;
   background-color: #EDE0D4;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64442F;
   font-size: 24px;
+  color: #64442F;
 }
 
 .logo-text h3 {
@@ -77,6 +90,12 @@
   text-decoration: none;
   transition: all 0.3s ease;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 12px;
 }
 
 .nav-item:hover {

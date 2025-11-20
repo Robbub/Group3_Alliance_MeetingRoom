@@ -3,7 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { FaThLarge, FaCalendarCheck, FaRedoAlt, FaDoorOpen, FaUsers, FaCog } from "react-icons/fa";
 import "./Sidebar.css";
 
-export const Sidebar = () => {
+interface SidebarProps {
+  collapsed?: boolean;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const location = useLocation();
 
   const menuItems = [
@@ -16,30 +20,33 @@ export const Sidebar = () => {
   ];
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <div className="logo-icon">
             <FaDoorOpen />
           </div>
-          <div className="logo-text">
-            <h3>RoomBook</h3>
-            <p>Admin Dashboard</p>
-          </div>
+          {!collapsed && (
+            <div className="logo-text">
+              <h3>Bookings</h3>
+              <p>Admin Dashboard</p>
+            </div>
+          )}
         </div>
       </div>
 
       <nav className="sidebar-nav">
         <div className="nav-section">
-          <h4 className="nav-section-title">Management</h4>
+          {!collapsed && <h4 className="nav-section-title">Management</h4>}
           {menuItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={`nav-item ${location.pathname === item.path ? "active" : ""}`}
+              title={collapsed ? item.label : ""}
             >
               <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
+              {!collapsed && <span className="nav-label">{item.label}</span>}
             </Link>
           ))}
         </div>

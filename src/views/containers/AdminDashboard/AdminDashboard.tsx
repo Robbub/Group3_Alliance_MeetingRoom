@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Sidebar } from "../../components/Sidebar/Sidebar";
 import { FaClock, FaCheckCircle, FaCalendarAlt, FaChartLine } from "react-icons/fa";
+import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import "./AdminDashboard.css";
 import { 
   adminService, 
@@ -8,6 +9,7 @@ import {
   TodaysMeeting, 
   RoomUtilization 
 } from "../../../services/adminService";
+import { Header } from "../../components/Header/Header";
 
 export const AdminDashboard = () => {
   const [stats, setStats] = useState<DashboardStats>({
@@ -19,11 +21,12 @@ export const AdminDashboard = () => {
   const [todaysMeetings, setTodaysMeetings] = useState<TodaysMeeting[]>([]);
   const [roomUtilization, setRoomUtilization] = useState<RoomUtilization[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   useEffect(() => {
     fetchDashboardData();
     
-    // Refresh data every 5 minutes
+    // refresh data every 5 minutes
     const interval = setInterval(fetchDashboardData, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -86,22 +89,27 @@ export const AdminDashboard = () => {
   ];
 
   return (
-    <div className="admin-layout">
-      <Sidebar />
-      <div className="admin-content">
-        <div className="admin-topbar">
-          <button className="menu-toggle">☰</button>
-          <div className="admin-user">
-            <span>Admin User</span>
-            <div className="user-avatar">A</div>
+    <>
+      <Header />
+      <div className="admin-layout">
+        <Sidebar collapsed={sidebarCollapsed} />
+        <div className="admin-content">
+          <div className="dashboard-main">
+            <div className="dashboard-header">
+            <button 
+              className="sidebar-toggle-btn"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? <GoSidebarExpand /> : <GoSidebarCollapse />}
+            </button>
+            <div>
+              <h1>Dashboard</h1>
+              
+            </div>
+              
           </div>
-        </div>
-
-        <div className="dashboard-main">
-          <div className="dashboard-header">
-            <h1>Dashboard</h1>
-            <p className="dashboard-subtitle">Overview of your meeting room bookings</p>
-          </div>
+          {/* <p className="dashboard-subtitle">Overview of your meeting room bookings</p> */}
 
           {/* Stats Cards */}
           <div className="stats-grid">
@@ -176,10 +184,11 @@ export const AdminDashboard = () => {
                   ))}
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };

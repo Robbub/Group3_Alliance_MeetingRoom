@@ -1,14 +1,22 @@
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - 100px);
   background-color: #f5f5f5;
+  width: 100%;
+  margin-top: 100px;
 }
 
 .admin-content {
   flex: 1;
-  margin-left: 260px;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  margin-left: 80px;
+  transition: margin-left 0.3s ease;
+}
+
+.admin-layout:has(.sidebar:not(.collapsed)) .admin-content {
+  margin-left: 260px;
 }
 
 .admin-topbar {
@@ -51,12 +59,41 @@
 }
 
 .dashboard-main {
-  padding: 40px;
+  padding: 30px 40px;
   flex: 1;
 }
 
 .dashboard-header {
   margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #64442F;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #E6CCB2;
+}
+
+.sidebar-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.dashboard-header > div {
+  flex: 1;
 }
 
 .dashboard-header h1 {
