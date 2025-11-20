@@ -266,44 +266,4 @@
   margin-left: 6px;
   font-weight: bold;
   color: #8b5e3c;
-}.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.participant-input {
-  position: relative;
-}
-
-.participant-input input {
-  padding: 10px;
-  font-size: 14px;
-  border: 2px solid #ddb892;
-  border-radius: 6px;
-  width: 100%;
-}
-
-.selected-participants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.participant-tag {
-  background-color: #eee;
-  padding: 5px 10px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  color: #4a2e1f;
-  background: #f5ede3;
-  border: 1px solid #b5805c;
-}
-
-.participant-tag span {
-  cursor: pointer;
-  margin-left: 6px;
-  font-weight: bold;
-  color: #8b5e3c;
 }

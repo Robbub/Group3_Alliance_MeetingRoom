@@ -124,6 +124,7 @@
   box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15);
 }
 
+<<<<<<< HEAD
 /* === Username Input Styling === */
 .add-user-modal input[type="text"],
 .username-input {
@@ -145,6 +146,8 @@
   box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.15);
 }
 
+=======
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
 /* === Role Section === */
 .role-section {
   margin-top: 1rem;
@@ -183,6 +186,14 @@
   font-size: 15px;
   margin-top: 1rem;
   transition: all 0.2s;
+<<<<<<< HEAD
+=======
+}
+
+.submit-btn:hover {
+  background: #734621;
+  transform: translateY(-2px);
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
 }
 
 .submit-btn:hover {

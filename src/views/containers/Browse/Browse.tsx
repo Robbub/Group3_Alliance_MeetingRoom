@@ -1,4 +1,3 @@
-// Replace the entire Browse component with this fixed version:
 import React, { useState, useEffect } from "react";
 import { Header } from "../../../views/components/Header/Header";
 import BookingModal from "../../../views/components/BookingModal/BookingModal";
@@ -24,9 +23,56 @@ interface Room {
 // Backend API configuration
 const API_BASE_URL = "http://localhost:64508/api/Room";
 
+// Fallback data in case server is down
+const fallbackRooms: Room[] = [
+  {
+    id: 1,
+    name: "Board Room",
+    floor: "6th Floor",
+    image: "/assets/meeting-room2.jpg",
+    amenities: ["Air-con", "Whiteboard", "Projector", "Video Conferencing"],
+    capacity: 12,
+  },
+  {
+    id: 2,
+    name: "Innovation Hub",
+    floor: "6th Floor",
+    image: "/assets/meeting-room7.png",
+    amenities: ["Air-con", "Smart TV", "Whiteboard", "Coffee Machine"],
+    capacity: 8,
+  },
+  {
+    id: 3,
+    name: "Strategy Room",
+    floor: "7th Floor",
+    image: "/assets/meeting-room4.png",
+    amenities: ["Air-con", "Projector", "Ergonomic Chairs"],
+    capacity: 6,
+  },
+  {
+    id: 4,
+    name: "Collaboration Space",
+    floor: "7th Floor",
+    image: "/assets/meeting-room5.jpg",
+    amenities: ["Air-con", "Whiteboard", "Standing Desks", "Video Conferencing"],
+    capacity: 10,
+  },
+  {
+    id: 5,
+    name: "Executive Suite",
+    floor: "8th Floor",
+    image: "/assets/meeting-room6.png",
+    amenities: ["Air-con", "Leather Chairs", "Privacy Glass", "Mini Fridge"],
+    capacity: 4,
+  },
+];
+
 export const Browse = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
+<<<<<<< HEAD
   const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
+=======
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,6 +89,36 @@ export const Browse = () => {
   const title = searchParams.get("title") || "";
   const endDate = searchParams.get("endDate") || "";
 
+<<<<<<< HEAD
+=======
+  // Fetch rooms from server
+  const fetchRooms = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/rooms');
+      if (!response.ok) throw new Error('Failed to fetch rooms');
+      
+      const roomsData = await response.json();
+      console.log('Fetched rooms data:', roomsData);
+      
+      // Transform server data to Browse format
+      const transformedRooms: Room[] = roomsData.map((room: any) => ({
+        id: room.id,
+        name: room.roomName,
+        floor: `${getFloorSuffix(room.floorNumber)} Floor`,
+        image: room.coverPhoto || getDefaultImage(room.id),
+        amenities: room.amenities || [],
+        capacity: room.capacity,
+      }));
+      
+      setAllRooms(transformedRooms);
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      // Use fallback data if server is down
+      setAllRooms(fallbackRooms);
+    }
+  };
+
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
   // Helper function to get floor suffix
   const getFloorSuffix = (floor: string | number) => {
     const num = typeof floor === 'string' ? parseInt(floor) : floor;
@@ -64,6 +140,7 @@ export const Browse = () => {
     return images[(id - 1) % images.length];
   };
 
+<<<<<<< HEAD
   // Fetch rooms and amenities from backend
   useEffect(() => {
     const fetchData = async () => {
@@ -135,6 +212,38 @@ export const Browse = () => {
           roomAmenity.toLowerCase().includes(amenity.toLowerCase())
         )
       );
+=======
+  // Initial fetch
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  // Listen for room updates from RoomManagement
+  useEffect(() => {
+    let isUpdating = false;
+    
+    const handleRoomsUpdate = () => {
+      if (isUpdating) return; // Prevent multiple simultaneous updates
+      isUpdating = true;
+      
+      console.log('Rooms updated event received, refetching...');
+      fetchRooms().finally(() => {
+        isUpdating = false;
+      });
+    };
+
+    window.addEventListener('roomsUpdated', handleRoomsUpdate);
+
+    return () => {
+      window.removeEventListener('roomsUpdated', handleRoomsUpdate);
+    };
+  }, []);
+
+  const filteredRooms = allRooms.filter((room) => {
+    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesAmenities = initialAmenities.length === 0 || 
+      initialAmenities.every(amenity => room.amenities.includes(amenity));
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
     
     return matchesSearch && matchesAmenities;
   });
@@ -200,6 +309,10 @@ export const Browse = () => {
                 alt={room.name} 
                 className="room-image"
                 onError={(e) => {
+<<<<<<< HEAD
+=======
+                  // Fallback to default image if current image fails
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
                   e.currentTarget.src = getDefaultImage(room.id);
                 }}
               />

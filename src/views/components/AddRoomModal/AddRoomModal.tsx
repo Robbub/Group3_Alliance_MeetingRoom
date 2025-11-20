@@ -70,6 +70,7 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
       return;
     }
 
+<<<<<<< HEAD
     // Check for duplicate room names
     const isDuplicate = existingRooms.some(room =>
       room.roomName.toLowerCase() === roomName.trim().toLowerCase()
@@ -81,24 +82,65 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
 
     // Convert selected IDs back to Amenity objects for the parent component
     const selectedAmenitiesObjects = allAmenities.filter(amenity => selectedAmenityIds.includes(amenity.id));
+=======
+  const handleSave = async () => {
+    if (!roomName.trim()) {
+      alert('Please enter a room name');
+      return;
+    }
+
+    if (amenities.length === 0) {
+      alert('Please add at least one amenity');
+      return;
+    }
+
+    // Check for duplicate room names
+    const isDuplicate = existingRooms.some(room => 
+      room.roomName.toLowerCase() === roomName.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      alert('A room with this name already exists. Please choose a different name.');
+      return;
+    }
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
 
     const newRoom: Omit<Room, 'id'> = {
       roomName: roomName.trim(),
       floorNumber,
       capacity: parseInt(capacity),
+<<<<<<< HEAD
       amenities: selectedAmenitiesObjects, // Pass the object array
+=======
+      amenities,
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
       coverPhoto: coverPhoto || getDefaultImage(),
       available: true
     };
 
+<<<<<<< HEAD
     onSave(newRoom);
+=======
+    // Only pass data to parent, don't make API call here
+    onSave(newRoom as Room); // Parent will handle the API call and add the ID
+    
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
     // Reset form
     setRoomName('');
     setFloorNumber('1');
     setCapacity('1');
+<<<<<<< HEAD
     setSelectedAmenityIds([]);
     setCoverPhoto('');
+=======
+    setAmenities([]);
+    setTempAmenity('');
+    setCoverPhoto('');
+    setCoverPhotoFile(null);
+    
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
     onHide();
+    // Remove the alert from here - parent will handle it
   };
 
   const getDefaultImage = () => {
@@ -107,10 +149,20 @@ const AddRoomModal: React.FC<AddRoomModalProps> = ({ show, onHide, onSave, exist
       "/assets/meeting-room7.png",
       "/assets/meeting-room4.png",
       "/assets/meeting-room5.jpg",
+<<<<<<< HEAD
       "/assets/meeting-room6.png",
     ];
     return defaultImages[Math.floor(Math.random() * defaultImages.length)];
   };
+=======
+      "/assets/meeting-room6.png"
+    ];
+    return defaultImages[Math.floor(Math.random() * defaultImages.length)];
+  };
+
+  const floorOptions = Array.from({ length: 17 }, (_, i) => (i + 1).toString());
+  const capacityOptions = Array.from({ length: 50 }, (_, i) => (i + 1).toString());
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
 
   if (!show) return null;
 

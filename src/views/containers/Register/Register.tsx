@@ -23,6 +23,7 @@ export const Register = () => {
       return;
     }
 
+<<<<<<< HEAD
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
@@ -71,7 +72,27 @@ export const Register = () => {
       } else {
         alert(`Registration failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
+=======
+    const response = await fetch("https://localhost:50552/api/Account/Register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: formData.username,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      }),
+    });
+
+    if (!response.ok) {
+      const msg = await response.text();
+      alert(msg || "Failed to register.");
+      return;
+>>>>>>> 98aecedf226ae26a53d0b4714f91f5c68499318f
     }
+
+    alert("Registration successful!");
+    navigate(PATHS.LOGIN.path);
   };
 
   return (
