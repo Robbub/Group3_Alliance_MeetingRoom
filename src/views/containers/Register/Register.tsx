@@ -84,6 +84,9 @@ export const Register = () => {
               Continue with Company Email
             </button>
           </form>
+          <div className="login-link">
+            Already have an account? <a href="/login">Log In</a>
+          </div>
         </div>
       </div>
     </div>

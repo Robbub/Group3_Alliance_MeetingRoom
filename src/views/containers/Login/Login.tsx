@@ -17,7 +17,7 @@ export const Login = () => {
       const users = await response.json();
 
       const user = users.find(
-        (u) => u.username === formData.username && u.password === formData.password
+        (u: any) => u.username === formData.username && u.password === formData.password
       );
 
       if (user) {

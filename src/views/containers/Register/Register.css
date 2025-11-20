@@ -71,6 +71,7 @@
   cursor: pointer;
   font-size: 16px;
   margin-top: 10px;
+  box-sizing: border-box;
 }
 
 .company-email-button {
@@ -84,6 +85,16 @@
   font-size: 14px;
   margin-top: 10px;
   font-weight: 600;
+}
+
+
+.login-link {
+  margin-top: 15px;
+}
+
+.login-link a {
+  color: #64442F;
+  text-decoration: none;
 }
 
 .back-link {
