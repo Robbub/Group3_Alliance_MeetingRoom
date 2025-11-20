@@ -38,14 +38,14 @@ export const Header = () => {
   return (
     <header className="header">
       <div className="logo">
-        <a href="/">
+        <Link to="/">
           <img src="/assets/summit-logo.png" alt="SUMMITFLOW" />
-        </a>
+        </Link>
       </div>
       <nav className="nav-links">
-        <Link to="/homepage">ABOUT US</Link>
+        <Link to="/about">ABOUT US</Link>
         <Link to="/browse">BROWSE</Link>
-        <Link to={currentUser?.username === "admin" ? "/admin" : "/upcoming"}>
+        <Link to={currentUser?.username === "admin" ? "/dashboard" : "/upcoming"}>
           MANAGE
         </Link>
       </nav>

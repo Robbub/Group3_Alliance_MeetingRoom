@@ -28,6 +28,10 @@ export const PATHS = {
     path: "/",
     label: "Homepage",
   },
+  ABOUT_US: {
+    path: "/about",
+    label: "About Us",
+  },
   UPCOMING: {
     path: "/upcoming",
     label: "Upcoming",

@@ -10,6 +10,7 @@ export const AppRoutes = () => {
         {/* Public Routes */}
         <Route path={PATHS.LOGIN.path} element={<Views.Login />} />
         <Route path={PATHS.REGISTER.path} element={<Views.Register />} />
+        <Route path={PATHS.ABOUT_US.path} element={<Views.AboutUs />} />
         <Route path={PATHS.NOT_FOUND.path} element={<Views.NotFound />} />
 
         {/* Protected Routes */}
