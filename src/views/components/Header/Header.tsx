@@ -9,8 +9,11 @@ export const Header = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   
-  // [NEW] Get current user from localStorage
+  // [get current user from localStorage
   const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+  
+  // check if on login/register page
+  const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -49,31 +52,35 @@ export const Header = () => {
           MANAGE
         </Link>
       </nav>
-      <div className="user-menu" ref={dropdownRef}>
-        <button className="dropdown-toggle" onClick={toggleDropdown}>
-          <FaBars className="menu-icon" />
-          <FaUserCircle className="user-icon" />
+      
+      {/* show Login button if not logged in (and not on auth pages), otherwise show user menu */}
+      {!currentUser && !isAuthPage ? (
+        <button className="login-button" onClick={() => navigate("/login")}>
+          Log-in
         </button>
-        {isDropdownOpen && (
-          <div className="dropdown-content">
-            {/* show username if logged in */}
-            {currentUser && (
+      ) : currentUser ? (
+        <div className="user-menu" ref={dropdownRef}>
+          <button className="dropdown-toggle" onClick={toggleDropdown}>
+            <FaBars className="menu-icon" />
+            <FaUserCircle className="user-icon" />
+          </button>
+          {isDropdownOpen && (
+            <div className="dropdown-content">
+              {/* show username if logged in */}
               <div className="user-info">
                 Logged in as: {currentUser.username}
               </div>
-            )}
-            <Link to="/notifications">Notifications</Link>
-            <hr />
-            <Link to="/help-center">Help Center</Link>
-            <Link to="/preferences">Preferences</Link>
-            {currentUser && (
+              <Link to="/notifications">Notifications</Link>
+              <hr />
+              <Link to="/help-center">Help Center</Link>
+              <Link to="/preferences">Preferences</Link>
               <button onClick={handleLogout} className="logout-button">
                 Logout
               </button>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      ) : null}
     </header>
   );
 };
