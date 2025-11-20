@@ -259,13 +259,18 @@
 }
 
 .meeting-status.confirmed {
-  background-color: #64442F;
+  background-color: #5a9d6c;
   color: white;
 }
 
 .meeting-status.pending {
   background-color: #E6CCB2;
   color: #64442F;
+}
+
+.meeting-status.rejected {
+  background-color: #E57373;
+  color: white;
 }
 
 /* Room Utilization */

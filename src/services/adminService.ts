@@ -13,7 +13,7 @@ export interface TodaysMeeting {
   organizer: string;
   startTime: string;
   endTime: string;
-  status: 'confirmed' | 'pending';
+  status: 'confirmed' | 'pending' | 'rejected';
 }
 
 export interface RoomUtilization {
@@ -38,26 +38,37 @@ export const adminService = {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Calculate pending requests (bookings without approval or in pending state)
+      console.log('Dashboard - All bookings:', bookings);
+
+      // Calculate pending requests (bookings with status 'Pending')
       const pendingRequests = bookings.filter((b: any) => 
-        b.status === 'Pending' || !b.status
+        b.bookingStatus === 'Pending'
       ).length;
+
+      console.log('Dashboard - Pending requests:', pendingRequests);
 
       // Calculate approved today
       const approvedToday = bookings.filter((b: any) => {
-        const bookingDate = new Date(b.date);
+        const bookingDate = new Date(b.bookingDate);
         bookingDate.setHours(0, 0, 0, 0);
         return bookingDate.getTime() === today.getTime() && 
-               (b.status === 'Confirmed' || b.status === 'Approved');
+               (b.bookingStatus === 'Approved');
       }).length;
 
-      // Calculate active bookings (today's ongoing meetings)
+      console.log('Dashboard - Approved today:', approvedToday);
+
+      // Calculate active bookings (today's ongoing meetings that are approved)
       const now = new Date();
       const activeBookings = bookings.filter((b: any) => {
-        const bookingDate = new Date(b.date);
+        const bookingDate = new Date(b.bookingDate);
         bookingDate.setHours(0, 0, 0, 0);
         
         if (bookingDate.getTime() !== today.getTime()) {
+          return false;
+        }
+
+        // Only count approved bookings
+        if (b.bookingStatus !== 'Approved') {
           return false;
         }
 
@@ -82,19 +93,23 @@ export const adminService = {
                currentTimeInMinutes <= endTimeInMinutes;
       }).length;
 
-      // Calculate completion rate (percentage of completed bookings)
+      console.log('Dashboard - Active bookings:', activeBookings);
+
+      // Calculate completion rate (percentage of approved vs total past bookings)
       const pastBookings = bookings.filter((b: any) => {
-        const bookingDate = new Date(b.date);
+        const bookingDate = new Date(b.bookingDate);
         return bookingDate < today;
       });
       
-      const completedBookings = pastBookings.filter((b: any) => 
-        b.status === 'Completed' || b.status === 'Confirmed'
+      const approvedPastBookings = pastBookings.filter((b: any) => 
+        b.bookingStatus === 'Approved'
       );
       
       const completionRate = pastBookings.length > 0 
-        ? Math.round((completedBookings.length / pastBookings.length) * 100)
+        ? Math.round((approvedPastBookings.length / pastBookings.length) * 100)
         : 100;
+
+      console.log('Dashboard - Completion rate:', completionRate);
 
       return {
         pendingRequests,
@@ -132,18 +147,29 @@ export const adminService = {
       // Filter for today's bookings and map to TodaysMeeting format
       const todaysMeetings = bookings
         .filter((b: any) => {
-          const bookingDate = new Date(b.date);
+          const bookingDate = new Date(b.bookingDate);
           bookingDate.setHours(0, 0, 0, 0);
           return bookingDate.getTime() === today.getTime();
         })
-        .map((b: any) => ({
-          id: b.id,
-          roomName: b.roomName,
-          organizer: b.organizer,
-          startTime: b.startTime,
-          endTime: b.endTime,
-          status: b.status?.toLowerCase() === 'confirmed' ? 'confirmed' : 'pending'
-        }))
+        .map((b: any) => {
+          const statusLower = b.bookingStatus?.toLowerCase() || '';
+          let status: 'confirmed' | 'pending' | 'rejected' = 'pending';
+          
+          if (statusLower === 'approved') {
+            status = 'confirmed';
+          } else if (statusLower === 'rejected') {
+            status = 'rejected';
+          }
+          
+          return {
+            id: b.bookingId,
+            roomName: b.room?.roomName || 'Unknown Room',
+            organizer: `${b.user?.firstName || ''} ${b.user?.lastName || ''}`.trim() || 'Unknown',
+            startTime: b.startTime,
+            endTime: b.endTime,
+            status: status
+          };
+        })
         .sort((a: any, b: any) => {
           // Sort by start time
           const aTime = a.startTime.match(/(\d+):(\d+)/);
@@ -187,7 +213,7 @@ export const adminService = {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
       const recentBookings = bookings.filter((b: any) => {
-        const bookingDate = new Date(b.date);
+        const bookingDate = new Date(b.bookingDate);
         return bookingDate >= thirtyDaysAgo;
       });
 
@@ -197,7 +223,7 @@ export const adminService = {
       // Calculate utilization per room
       const roomUtilization = rooms.map((room: any, index: number) => {
         const roomBookings = recentBookings.filter((b: any) => 
-          b.roomId === room.id || b.roomName === room.roomName
+          b.roomId === room.roomId || b.room?.roomName === room.roomName
         );
 
         // Calculate total booked hours

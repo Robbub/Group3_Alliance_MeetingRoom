@@ -26,9 +26,23 @@ export const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboardData();
     
-    // refresh data every 5 minutes
-    const interval = setInterval(fetchDashboardData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
+    // Refresh data when user comes back to the page
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('Dashboard visible, refreshing data...');
+        fetchDashboardData();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // refresh data every 30 seconds for real-time updates
+    const interval = setInterval(fetchDashboardData, 30 * 1000);
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   const fetchDashboardData = async () => {
@@ -101,7 +115,7 @@ export const AdminDashboard = () => {
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {sidebarCollapsed ? <GoSidebarExpand /> : <GoSidebarCollapse />}
+              {sidebarCollapsed ? <GoSidebarCollapse /> : <GoSidebarExpand />}
             </button>
             <div>
               <h1>Dashboard</h1>
@@ -109,7 +123,6 @@ export const AdminDashboard = () => {
             </div>
               
           </div>
-          {/* <p className="dashboard-subtitle">Overview of your meeting room bookings</p> */}
 
           {/* Stats Cards */}
           <div className="stats-grid">
