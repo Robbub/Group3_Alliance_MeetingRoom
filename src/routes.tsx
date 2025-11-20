@@ -8,20 +8,13 @@ export const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
+        <Route path={PATHS.MAINSCREEN.path} element={<Views.MainScreen />} />
         <Route path={PATHS.LOGIN.path} element={<Views.Login />} />
         <Route path={PATHS.REGISTER.path} element={<Views.Register />} />
         <Route path={PATHS.ABOUT_US.path} element={<Views.AboutUs />} />
         <Route path={PATHS.NOT_FOUND.path} element={<Views.NotFound />} />
 
         {/* Protected Routes */}
-        <Route
-          path={PATHS.HOMEPAGE.path}
-          element={
-            <ProtectedRoute>
-              <Views.Homepage />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path={PATHS.UPCOMING.path}
           element={

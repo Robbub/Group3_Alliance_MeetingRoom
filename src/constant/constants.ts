@@ -24,9 +24,9 @@ export const PATHS = {
     path: "/register",
     label: "Register",
   },
-  HOMEPAGE: {
+  MAINSCREEN: {
     path: "/",
-    label: "Homepage",
+    label: "MainScreen",
   },
   ABOUT_US: {
     path: "/about",
