@@ -4,7 +4,7 @@ import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
 import "./Register.css";
 
-const API_BASE_URL = 'http://localhost:49971/api';
+const API_BASE_URL = 'http://localhost:64508/api';
 
 export const Register = () => {
   const [formData, setFormData] = useState({ 

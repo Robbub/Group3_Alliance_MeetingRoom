@@ -63,7 +63,11 @@ export const PATHS = {
   USER_MANAGEMENT: {
     path: "/usermanagement",
     label: "User Management",
-  },  
+  },
+  ADMIN_DASHBOARD: {
+    path: "/admin-dashboard",
+    label: "Admin Dashboard",
+  },
   // Add more routes here
 };
 

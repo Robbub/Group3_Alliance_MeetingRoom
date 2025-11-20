@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:49971/api';
+const API_BASE_URL = 'http://localhost:64508/api';
 
 export interface DashboardStats {
   pendingRequests: number;

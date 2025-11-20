@@ -43,7 +43,7 @@ export const AppRoutes = () => {
           path={PATHS.DASHBOARD.path}
           element={
             <ProtectedRoute>
-              <Views.Dashboard />
+              <Views.AdminDashboard />
             </ProtectedRoute>
           }
         />
