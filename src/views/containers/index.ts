@@ -1,4 +1,4 @@
-export * from "./MainScreen/MainScreen";
+export * from "./Homepage/Homepage";
 export * from "./NotFound";
 export * from "./Dashboard";
 export * from "./Login";

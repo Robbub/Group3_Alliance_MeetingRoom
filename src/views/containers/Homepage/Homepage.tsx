@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
 import "./Homepage.css";
@@ -22,9 +22,9 @@ export const Homepage = () => {
           <h2>Browse Meeting</h2>
           <h2>Rooms</h2>
           <p>Explore properties by their categories/types...</p>
-          <button className="book-room-button">
-                <a href="/browse">Book a room</a>
-            </button>
+          <button className="book-room-button" onClick={() => navigate('/browse')}>
+            Book a room
+          </button>
         </div>
       </div>
     </div>

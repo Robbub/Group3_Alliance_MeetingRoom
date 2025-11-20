@@ -1,52 +1,70 @@
 .aboutus-container {
   min-height: 100vh;
   background-color: #f5f5f5;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .aboutus-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px 20px;
+  width: 100%;
 }
 
 /* Hero Section */
 .aboutus-hero {
+  position: relative;
   width: 100%;
-  height: 400px;
-  background: linear-gradient(135deg, rgba(100, 68, 47, 0.95) 0%, rgba(152, 125, 98, 0.9) 100%),
-              url('../Homepage/assets/meeting-back.png');
+  height: 500px;
+  background: url('../Homepage/assets/meeting-back.png');
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-  border-radius: 0 0 30px 30px;
+  overflow: hidden;
   margin-bottom: 60px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.hero-text-content {
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
+/* .hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, 
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.6) 40%,
+    rgba(0, 0, 0, 0.3) 70%,
+    transparent 100%);
+} */
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 60px;
 }
 
-.aboutus-hero h1 {
+.hero-title {
   font-size: 3.5rem;
-  margin-bottom: 20px;
   font-weight: 700;
-  color: #fff;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: white;
+  margin-bottom: 20px;
+  line-height: 1.2;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.hero-subtitle {
-  font-size: 1.5rem;
-  font-weight: 300;
-  color: #FFF1E0;
+.hero-slogan {
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: #4A90E2;
   margin: 0;
+  line-height: 1.4;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* Section Styling */
@@ -258,18 +276,24 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .aboutus-hero {
-    height: 300px;
+    height: 350px;
+    margin-bottom: 20px;
   }
 
-  .aboutus-hero h1 {
+  .hero-content {
+    padding: 0 30px;
+  }
+
+  .hero-title {
     font-size: 2.2rem;
   }
 
-  .hero-subtitle {
-    font-size: 1.1rem;
+  .hero-slogan {
+    font-size: 1.2rem;
   }
 
   .aboutus-section {
+    margin-top: 15px;
     padding: 35px 25px;
   }
 
@@ -302,12 +326,16 @@
 }
 
 @media (max-width: 480px) {
-  .aboutus-hero h1 {
+  .hero-title {
     font-size: 1.8rem;
   }
 
-  .hero-subtitle {
+  .hero-slogan {
     font-size: 1rem;
+  }
+
+  .hero-content {
+    padding: 0 20px;
   }
 
   .mission-text {

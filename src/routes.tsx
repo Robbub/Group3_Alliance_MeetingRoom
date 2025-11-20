@@ -8,7 +8,7 @@ export const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path={PATHS.MAINSCREEN.path} element={<Views.MainScreen />} />
+        <Route path={PATHS.HOMEPAGE.path} element={<Views.Homepage />} />
         <Route path={PATHS.LOGIN.path} element={<Views.Login />} />
         <Route path={PATHS.REGISTER.path} element={<Views.Register />} />
         <Route path={PATHS.ABOUT_US.path} element={<Views.AboutUs />} />
