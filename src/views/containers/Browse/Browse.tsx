@@ -22,7 +22,7 @@ interface Room {
 }
 
 // Backend API configuration
-const API_BASE_URL = "https://localhost:3150/api/Room";
+const API_BASE_URL = "http://localhost:64508/api/Room";
 
 export const Browse = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);

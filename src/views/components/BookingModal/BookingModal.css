@@ -92,6 +92,13 @@
   width: 100%;
   box-sizing: border-box;
   height: 42px; /* Fixed height for all inputs */
+  transition: border-color 0.2s;
+}
+
+.form-group.error input,
+.form-group.error select {
+  border-color: #d32f2f;
+  border-bottom-color: #d32f2f;
 }
 
 .participant-input input {
@@ -181,6 +188,11 @@
 .cancel-btn:hover,
 .book-btn:hover {
   opacity: 0.9;
+}
+
+.book-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .recurring-form {

@@ -51,7 +51,7 @@ export const Upcoming = () => {
   useEffect(() => {
     const fetchUpcomingBookings = async () => {
       try {
-        const response = await fetch(`https://localhost:3150/api/Booking/GetUpcomingBookings/${currentUser}`);
+        const response = await fetch(`http://localhost:64508/api/Booking/GetUpcomingBookings/${currentUser}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch upcoming bookings: ${response.status}`);
         }
@@ -94,7 +94,7 @@ export const Upcoming = () => {
     const fetchParticipants = async () => {
       try {
         console.log("Fetching participants...");
-        const response = await fetch("https://localhost:3150/api/Booking/GetAvailableParticipants");
+        const response = await fetch("http://localhost:64508/api/Booking/GetAvailableParticipants");
         if (response.ok) {
           const participantsData = await response.json();
           console.log("Fetched participants:", participantsData);
@@ -207,7 +207,7 @@ export const Upcoming = () => {
 
       console.log("Updating booking with data:", updateData); 
 
-      const response = await fetch(`https://localhost:3150/api/Booking/UpdateBooking/${selectedBooking.id}`, {
+      const response = await fetch(`http://localhost:64508/api/Booking/UpdateBooking/${selectedBooking.id}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -233,7 +233,7 @@ export const Upcoming = () => {
       console.log("Update booking success response:", result);
       
       // Refresh bookings from backend
-      const refreshResponse = await fetch(`https://localhost:3150/api/Booking/GetUpcomingBookings/${currentUser}`);
+      const refreshResponse = await fetch(`http://localhost:64508/api/Booking/GetUpcomingBookings/${currentUser}`);
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
         console.log("Refreshed bookings data:", data);
@@ -272,7 +272,7 @@ export const Upcoming = () => {
   const handleCancelBooking = async (bookingId: number) => {
     if (window.confirm("Are you sure you want to cancel this booking?")) {
       try {
-        const response = await fetch(`https://localhost:3150/api/Booking/DeleteBooking/${bookingId}`, {
+        const response = await fetch(`http://localhost:64508/api/Booking/DeleteBooking/${bookingId}`, {
           method: "DELETE",
         });
 

@@ -45,7 +45,7 @@ export const Past = () => {
   useEffect(() => {
     const fetchPastBookings = async () => {
       try {
-        const response = await fetch(`https://localhost:3150/api/Booking/GetPastBookings/${currentUser}`);
+        const response = await fetch(`http://localhost:64508/api/Booking/GetPastBookings/${currentUser}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch past bookings: ${response.status}`);
         }

@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./BookingModal.css";
+import {
+  validateBookingFields,
+  validateBooking,
+  checkAvailability,
+  BookingViewModel,
+  ValidationErrors,
+} from "./bookingService";
 
 type Room = {
   id: number;
@@ -91,9 +98,17 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
   });
 
   const [error, setError] = useState<string>("");
+  const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({});
   const [availableParticipants, setAvailableParticipants] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showParticipantDropdown, setShowParticipantDropdown] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [availabilityStatus, setAvailabilityStatus] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    message: string;
+  }>({ checking: false, available: null, message: '' });
 
   // Set initial days of week when frequency changes to weekly
   useEffect(() => {
@@ -106,11 +121,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
     }
   }, [formData.frequency, formData.recurringStartDate]);
 
+  // Fetch participants - keep original endpoint
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
         // Fetch users with 'user' role only (excluding admin and super admin)
-        const response = await fetch("https://localhost:3150/api/User/GetUsersByRole/user");
+        const response = await fetch("http://localhost:64508/api/User/GetUsersByRole/user");
         if (!response.ok) {
           throw new Error(`Failed to fetch participants: ${response.status}`);
         }
@@ -127,7 +143,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
         console.error("Error fetching participants:", error);
         // Try alternative endpoint as fallback
         try {
-          const fallbackResponse = await fetch("https://localhost:3150/api/User/GetAllUsers");
+          const fallbackResponse = await fetch("http://localhost:64508/api/User/GetAllUsers");
           if (fallbackResponse.ok) {
             const allUsers = await fallbackResponse.json();
             // Filter only users with role "user"
@@ -226,49 +242,190 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
     setShowParticipantDropdown(value.length > 0);
   };
 
+  // Real-time field validation with debounce
+  const validateField = useCallback(
+    async (fieldName: string, value: any) => {
+      setIsValidating(true);
+      
+      const date = formData.recurring ? formData.recurringStartDate : formData.date;
+      const partialBooking: Partial<BookingViewModel> = {
+        RoomId: room.id,
+        RoomName: formData.roomName,
+        Floor: formData.floor,
+        Date: date,
+        StartTime: formData.startTime,
+        EndTime: formData.endTime,
+        Purpose: formData.purpose,
+        Organizer: currentUser,
+        Recurring: formData.recurring,
+        Frequency: formData.frequency || undefined,
+        RecurringEndDate: formData.recurringEndDate || undefined,
+        DaysOfWeek: formData.daysOfWeek || undefined,
+        [fieldName]: value,
+      };
+
+      try {
+        const errors = await validateBookingFields(partialBooking);
+        
+        // Only update errors for the current field
+        setFieldErrors(prev => ({
+          ...prev,
+          [fieldName]: errors[fieldName] || [],
+        }));
+
+        // Clear errors for other fields that are now valid
+        Object.keys(errors).forEach(key => {
+          if (key !== fieldName && !errors[key]) {
+            setFieldErrors(prev => {
+              const newErrors = { ...prev };
+              delete newErrors[key];
+              return newErrors;
+            });
+          }
+        });
+      } catch (error) {
+        console.error('Error validating field:', error);
+      } finally {
+        setIsValidating(false);
+      }
+    },
+    [formData, room.id, currentUser]
+  );
+
+  // Check room availability
+  const checkRoomAvailability = useCallback(async () => {
+    const date = formData.recurring ? formData.recurringStartDate : formData.date;
+    if (!room.id || !date || !formData.startTime || !formData.endTime) {
+      return;
+    }
+
+    setAvailabilityStatus({ checking: true, available: null, message: 'Checking availability...' });
+
+    try {
+      const available = await checkAvailability(
+        room.id,
+        date,
+        formData.startTime,
+        formData.endTime
+      );
+
+      if (available === null) {
+        // Server unavailable - don't show status
+        setAvailabilityStatus({
+          checking: false,
+          available: null,
+          message: '',
+        });
+      } else {
+        setAvailabilityStatus({
+          checking: false,
+          available,
+          message: available
+            ? 'Room is available'
+            : 'Room is not available at this time',
+        });
+      }
+    } catch (error) {
+      console.error('Error checking availability:', error);
+      setAvailabilityStatus({
+        checking: false,
+        available: null,
+        message: '',
+      });
+    }
+  }, [room.id, formData.date, formData.recurringStartDate, formData.startTime, formData.endTime, formData.recurring]);
+
+  // Check availability when relevant fields change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkRoomAvailability();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [formData.date, formData.recurringStartDate, formData.startTime, formData.endTime, formData.recurring, checkRoomAvailability]);
+
+  // Real-time validation on field changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.date || formData.recurringStartDate) {
+        validateField('Date', formData.recurring ? formData.recurringStartDate : formData.date);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.date, formData.recurringStartDate, formData.recurring, validateField]);
+
+  const getFieldError = (fieldName: string): string | undefined => {
+    const errors = fieldErrors[fieldName];
+    return errors && errors.length > 0 ? errors[0] : undefined;
+  };
+
+  const hasError = (fieldName: string): boolean => {
+    return !!getFieldError(fieldName);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setError("");
+      setFieldErrors({});
+      setIsSubmitting(true);
       
       const date = formData.recurring ? formData.recurringStartDate : formData.date;
-      if (!formData.roomName || !formData.floor || !date || !formData.startTime || !formData.endTime) {
-        setError("Please fill in all required fields.");
-        return;
-      }
-      if (formData.endTime <= formData.startTime) {
-        setError("End time must be after start time.");
-        return;
-      }
-      
       const currentUser = getCurrentUser();
       const allParticipants = formData.participants.includes(currentUser) 
         ? formData.participants 
         : [currentUser, ...formData.participants];
       
-      // SIMPLE: Just send participant names as strings, NOT UserViewModel objects
-      const bookingSubmissionData = {
+      // Convert days of week from short to full names if needed
+      const daysOfWeekFull = formData.daysOfWeek?.map(day => {
+        const dayMap: { [key: string]: string } = {
+          'Mon': 'Monday',
+          'Tue': 'Tuesday',
+          'Wed': 'Wednesday',
+          'Thu': 'Thursday',
+          'Fri': 'Friday',
+          'Sat': 'Saturday',
+          'Sun': 'Sunday'
+        };
+        return dayMap[day] || day;
+      });
+      
+      const bookingSubmissionData: BookingViewModel = {
         RoomId: room.id,
-        RoomName: room.name, 
-        Floor: room.floor,   
+        RoomName: formData.roomName, 
+        Floor: formData.floor,   
         Date: date,
         StartTime: formData.startTime,
         EndTime: formData.endTime,
         Purpose: formData.purpose || "Meeting",
         Organizer: currentUser,
         Recurring: formData.recurring,
-        Frequency: formData.frequency || null,
-        RecurringEndDate: formData.recurringEndDate || null,
-        DaysOfWeek: formData.daysOfWeek && formData.daysOfWeek.length > 0 
-          ? formData.daysOfWeek 
-          : null,
+        Frequency: formData.frequency || undefined,
+        RecurringEndDate: formData.recurringEndDate || undefined,
+        DaysOfWeek: daysOfWeekFull && daysOfWeekFull.length > 0 ? daysOfWeekFull : undefined,
         Image: room.image,
-        Participants: allParticipants // Just send names as strings
+        Participants: allParticipants
       };
       
       try {
+        // Full validation before submission
+        const validation = await validateBooking(bookingSubmissionData);
+        
+        if (!validation.isValid) {
+          setFieldErrors(validation.errors);
+          setIsSubmitting(false);
+          
+          // Show general error if no specific field errors
+          if (Object.keys(validation.errors).length === 0) {
+            setError("Validation failed. Please check your input.");
+          }
+          return;
+        }
+
+        // Submit booking using original endpoint
         console.log("Submitting booking data:", bookingSubmissionData);
         
-        const response = await fetch("https://localhost:3150/api/Booking/AddBooking", {
+        const response = await fetch("http://localhost:64508/api/Booking/AddBooking", {
           method: "POST",
           headers: { 
             "Content-Type": "application/json"
@@ -289,6 +446,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
       } catch (err) {
         console.error("Error saving booking:", err);
         setError(err instanceof Error ? err.message : "Failed to save booking.");
+      } finally {
+        setIsSubmitting(false);
       }
     };
 
@@ -297,7 +456,26 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
       <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
         <h2 className="modal-title">Booking Details</h2>
 
-        {error && <div style={{ color: 'red', marginBottom: 12, textAlign: 'center' }}>{error}</div>}
+        {error && <div style={{ color: 'red', marginBottom: 12, textAlign: 'center', padding: '8px', backgroundColor: '#ffebee', borderRadius: '4px' }}>{error}</div>}
+        
+        {/* Availability Status */}
+        {availabilityStatus.checking && (
+          <div style={{ color: '#1976d2', marginBottom: 12, textAlign: 'center', padding: '8px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
+            {availabilityStatus.message}
+          </div>
+        )}
+        {!availabilityStatus.checking && availabilityStatus.available !== null && (
+          <div style={{ 
+            color: availabilityStatus.available ? '#2e7d32' : '#c62828', 
+            marginBottom: 12, 
+            textAlign: 'center', 
+            padding: '8px', 
+            backgroundColor: availabilityStatus.available ? '#e8f5e9' : '#ffebee', 
+            borderRadius: '4px' 
+          }}>
+            {availabilityStatus.message}
+          </div>
+        )}
 
         <form className="booking-form" onSubmit={handleSubmit}>
           {/* Required Amenities Display */}
@@ -323,24 +501,41 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
 
           {/* Floor Number and Room Name Row */}
           <div className="form-row">
-            <div className="form-group">
-              <label>Floor Number</label>
+            <div className={`form-group ${hasError('Floor') ? 'error' : ''}`}>
+              <label>Floor Number <span style={{ color: '#d32f2f' }}>*</span></label>
               <select
                 value={formData.floor}
-                onChange={(e) => setFormData({ ...formData, floor: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, floor: e.target.value });
+                  setFieldErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors['Floor'];
+                    return newErrors;
+                  });
+                }}
+                style={hasError('Floor') ? { borderColor: '#d32f2f' } : {}}
               >
                 <option value="6th Floor">6th Floor</option>
                 <option value="7th Floor">7th Floor</option>
                 <option value="8th Floor">8th Floor</option>
               </select>
+              {hasError('Floor') && (
+                <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '4px' }}>{getFieldError('Floor')}</span>
+              )}
             </div>
-            <div className="form-group">
-              <label>Room Name</label>
+            <div className={`form-group ${hasError('RoomName') ? 'error' : ''}`}>
+              <label>Room Name <span style={{ color: '#d32f2f' }}>*</span></label>
               <select
                 value={formData.roomName}
-                onChange={(e) =>
-                  setFormData({ ...formData, roomName: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, roomName: e.target.value });
+                  setFieldErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors['RoomName'];
+                    return newErrors;
+                  });
+                }}
+                style={hasError('RoomName') ? { borderColor: '#d32f2f' } : {}}
               >
                 <option value="Board Room">Board Room</option>
                 <option value="Innovation Hub">Innovation Hub</option>
@@ -348,40 +543,77 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
                 <option value="Collaboration Space">Collaboration Space</option>
                 <option value="Executive Suite">Executive Suite</option>
               </select>
+              {hasError('RoomName') && (
+                <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '4px' }}>{getFieldError('RoomName')}</span>
+              )}
             </div>
           </div>
 
           {/* Date (full width) */}
-          <div className="form-group">
-            <label>Date</label>
+          <div className={`form-group ${hasError('Date') ? 'error' : ''}`}>
+            <label>Date <span style={{ color: '#d32f2f' }}>*</span></label>
             <input
               type="date"
               value={formData.recurring ? formData.recurringStartDate : formData.date}
-              onChange={(e) =>
-                formData.recurring
-                  ? setFormData({ ...formData, recurringStartDate: e.target.value })
-                  : setFormData({ ...formData, date: e.target.value })
-              }
+              onChange={(e) => {
+                if (formData.recurring) {
+                  setFormData({ ...formData, recurringStartDate: e.target.value });
+                } else {
+                  setFormData({ ...formData, date: e.target.value });
+                }
+                setFieldErrors(prev => {
+                  const newErrors = { ...prev };
+                  delete newErrors['Date'];
+                  return newErrors;
+                });
+              }}
+              min={new Date().toISOString().split('T')[0]}
+              style={hasError('Date') ? { borderColor: '#d32f2f' } : {}}
             />
+            {hasError('Date') && (
+              <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '4px' }}>{getFieldError('Date')}</span>
+            )}
           </div>
 
           {/* Start Time and End Time Row */}
           <div className="form-row">
-            <div className="form-group">
-              <label>Start Time</label>
+            <div className={`form-group ${hasError('StartTime') ? 'error' : ''}`}>
+              <label>Start Time <span style={{ color: '#d32f2f' }}>*</span></label>
               <input
                 type="time"
                 value={formData.startTime}
-                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, startTime: e.target.value });
+                  setFieldErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors['StartTime'];
+                    return newErrors;
+                  });
+                }}
+                style={hasError('StartTime') ? { borderColor: '#d32f2f' } : {}}
               />
+              {hasError('StartTime') && (
+                <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '4px' }}>{getFieldError('StartTime')}</span>
+              )}
             </div>
-            <div className="form-group">
-              <label>End Time</label>
+            <div className={`form-group ${hasError('EndTime') ? 'error' : ''}`}>
+              <label>End Time <span style={{ color: '#d32f2f' }}>*</span></label>
               <input
                 type="time"
                 value={formData.endTime}
-                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, endTime: e.target.value });
+                  setFieldErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors['EndTime'];
+                    return newErrors;
+                  });
+                }}
+                style={hasError('EndTime') ? { borderColor: '#d32f2f' } : {}}
               />
+              {hasError('EndTime') && (
+                <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '4px' }}>{getFieldError('EndTime')}</span>
+              )}
             </div>
           </div>
 
@@ -481,8 +713,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
               <button type="button" className="cancel-btn" onClick={() => onClose(true)}>
                 Cancel
               </button>
-              <button type="submit" className="book-btn">
-                Book
+              <button type="submit" className="book-btn" disabled={isSubmitting || isValidating}>
+                {isSubmitting ? 'Submitting...' : 'Book'}
               </button>
             </div>
           </div>
@@ -581,7 +813,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
                       name="frequency"
                       value="daily"
                       checked={formData.frequency === 'daily'}
-                      onChange={(e) => setFormData({ ...formData, frequency: e.target.value, daysOfWeek: [] })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, frequency: e.target.value, daysOfWeek: [] });
+                        setFieldErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors['Frequency'];
+                          return newErrors;
+                        });
+                      }}
                       style={{ accentColor: '#64442F' }}
                     />
                     <span style={{ fontSize: '14px' }}>Daily</span>
@@ -592,7 +831,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
                       name="frequency"
                       value="weekly"
                       checked={formData.frequency === 'weekly'}
-                      onChange={(e) => setFormData({ ...formData, frequency: e.target.value, daysOfWeek: [getCurrentDayOfWeek()] })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, frequency: e.target.value, daysOfWeek: [getCurrentDayOfWeek()] });
+                        setFieldErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors['Frequency'];
+                          return newErrors;
+                        });
+                      }}
                       style={{ accentColor: '#64442F' }}
                     />
                     <span style={{ fontSize: '14px' }}>Weekly</span>
@@ -603,12 +849,22 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
                       name="frequency"
                       value="monthly"
                       checked={formData.frequency === 'monthly'}
-                      onChange={(e) => setFormData({ ...formData, frequency: e.target.value, daysOfWeek: [] })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, frequency: e.target.value, daysOfWeek: [] });
+                        setFieldErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors['Frequency'];
+                          return newErrors;
+                        });
+                      }}
                       style={{ accentColor: '#64442F' }}
                     />
                     <span style={{ fontSize: '14px' }}>Monthly</span>
                   </label>
                 </div>
+                {hasError('Frequency') && (
+                  <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '8px', display: 'block' }}>{getFieldError('Frequency')}</span>
+                )}
 
                 {/* Frequency interval */}
                 {formData.frequency && (
@@ -638,44 +894,54 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
 
                 {/* Days of week for weekly */}
                 {formData.frequency === 'weekly' && (
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
-                    {[
-                      { short: 'Mon', full: 'Monday' },
-                      { short: 'Tue', full: 'Tuesday' },
-                      { short: 'Wed', full: 'Wednesday' },
-                      { short: 'Thu', full: 'Thursday' },
-                      { short: 'Fri', full: 'Friday' },
-                      { short: 'Sat', full: 'Saturday' },
-                      { short: 'Sun', full: 'Sunday' }
-                    ].map((day) => (
-                      <label 
-                        key={day.short}
-                        style={{ 
-                          display: 'flex', 
-                          alignItems: 'center',
-                          gap: '6px',
-                          cursor: 'pointer',
-                          fontSize: '14px'
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.daysOfWeek?.includes(day.short) || false}
-                          onChange={(e) => {
-                            const days = formData.daysOfWeek || [];
-                            setFormData({
-                              ...formData,
-                              daysOfWeek: e.target.checked
-                                ? [...days, day.short]
-                                : days.filter((d) => d !== day.short),
-                            });
+                  <>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
+                      {[
+                        { short: 'Mon', full: 'Monday' },
+                        { short: 'Tue', full: 'Tuesday' },
+                        { short: 'Wed', full: 'Wednesday' },
+                        { short: 'Thu', full: 'Thursday' },
+                        { short: 'Fri', full: 'Friday' },
+                        { short: 'Sat', full: 'Saturday' },
+                        { short: 'Sun', full: 'Sunday' }
+                      ].map((day) => (
+                        <label 
+                          key={day.short}
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            gap: '6px',
+                            cursor: 'pointer',
+                            fontSize: '14px'
                           }}
-                          style={{ accentColor: '#64442F' }}
-                        />
-                        {day.full}
-                      </label>
-                    ))}
-                  </div>
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.daysOfWeek?.includes(day.short) || false}
+                            onChange={(e) => {
+                              const days = formData.daysOfWeek || [];
+                              setFormData({
+                                ...formData,
+                                daysOfWeek: e.target.checked
+                                  ? [...days, day.short]
+                                  : days.filter((d) => d !== day.short),
+                              });
+                              setFieldErrors(prev => {
+                                const newErrors = { ...prev };
+                                delete newErrors['DaysOfWeek'];
+                                return newErrors;
+                              });
+                            }}
+                            style={{ accentColor: '#64442F' }}
+                          />
+                          {day.full}
+                        </label>
+                      ))}
+                    </div>
+                    {hasError('DaysOfWeek') && (
+                      <span style={{ color: '#d32f2f', fontSize: '12px', marginTop: '8px', display: 'block' }}>{getFieldError('DaysOfWeek')}</span>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -696,7 +962,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
                   <input
                     type="date"
                     value={formData.recurringStartDate || formData.date}
-                    onChange={(e) => setFormData({ ...formData, recurringStartDate: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, recurringStartDate: e.target.value });
+                      setFieldErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors['Date'];
+                        return newErrors;
+                      });
+                    }}
                     style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
                   />
                 </div>
@@ -716,10 +989,25 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, bookingData, onClose 
                       type="date"
                       value={formData.recurringEndDate}
                       min={formData.recurringStartDate || formData.date}
-                      onChange={(e) => setFormData({ ...formData, recurringEndDate: e.target.value })}
-                      style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc', marginLeft: '10px' }}
+                      onChange={(e) => {
+                        setFormData({ ...formData, recurringEndDate: e.target.value });
+                        setFieldErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors['RecurringEndDate'];
+                          return newErrors;
+                        });
+                      }}
+                      style={{ 
+                        padding: '8px', 
+                        borderRadius: '4px', 
+                        border: hasError('RecurringEndDate') ? '1px solid #d32f2f' : '1px solid #ccc', 
+                        marginLeft: '10px' 
+                      }}
                       disabled={formData.endType !== 'date'}
                     />
+                    {formData.endType === 'date' && hasError('RecurringEndDate') && (
+                      <span style={{ color: '#d32f2f', fontSize: '12px', marginLeft: '10px' }}>{getFieldError('RecurringEndDate')}</span>
+                    )}
                   </label>
 
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>

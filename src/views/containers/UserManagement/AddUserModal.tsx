@@ -94,7 +94,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onAddUser, editing
     try {
       if (editingUser) {
         // UPDATE USER
-        const response = await fetch(`https://localhost:3150/api/Account/UpdateUser/${editingUser.id}`, {
+        const response = await fetch(`http://localhost:64508/api/Account/UpdateUser/${editingUser.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -113,7 +113,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onAddUser, editing
         }
       } else {
         // ADD NEW USER
-        const response = await fetch("https://localhost:3150/api/Account/Register", {
+        const response = await fetch("http://localhost:64508/api/Account/Register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

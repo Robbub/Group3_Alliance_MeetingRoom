@@ -31,7 +31,7 @@ export const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://localhost:3150/api/Account/Login", {
+      const response = await fetch("http://localhost:64508/api/Account/Login", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

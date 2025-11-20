@@ -21,7 +21,7 @@ interface Room {
   available: boolean;
 }
 
-const API_BASE_URL = "https://localhost:3150/api/Room"; // Backend API base URL
+const API_BASE_URL = "http://localhost:64508/api/Room"; // Backend API base URL
 const AMENITIES_API_URL = `${API_BASE_URL}/GetAmenities`;
 
 const RoomManagement: React.FC = () => {

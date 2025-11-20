@@ -10,7 +10,7 @@ type Role = "admin" | "super admin" | "user";
 type SortKey = "email" | "name" | "role" | "username";
 type SortDirection = "asc" | "desc";
 const USERS_PER_PAGE = 7;
-const API_URL = "https://localhost:3150/api/Account";
+const API_URL = "http://localhost:64508/api/Account";
 
 // Compute user display name
 const computeName = (user: User) =>

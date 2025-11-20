@@ -582,7 +582,7 @@ export const BookingManagement = () => {
   useEffect(() => {
     const fetchAmenities = async () => {
       try {
-        const response = await fetch('https://localhost:3150/api/Room/GetAmenities'); // Adjust URL if needed
+        const response = await fetch('http://localhost:64508/api/Room/GetAmenities'); // Adjust URL if needed
         if (!response.ok) {
           throw new Error(`Failed to fetch amenities: ${response.status}`);
         }

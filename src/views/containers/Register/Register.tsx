@@ -30,26 +30,48 @@ export const Register = () => {
       return;
     }
 
-    const response = await fetch("https://localhost:3150/api/Account/Register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        UserId: formData.username,    // Username only
-        Password: formData.password, 
-        FirstName: formData.firstName, 
-        LastName: formData.lastName,  
-        Email: formData.email || ""   // Separate email field
-      }),
-    });
+    try {
+      console.log("Attempting to register at: http://localhost:64508/api/Account/Register");
+      const response = await fetch("http://localhost:64508/api/Account/Register", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          UserId: formData.username,    // Username only
+          Password: formData.password, 
+          FirstName: formData.firstName, 
+          LastName: formData.lastName,  
+          Email: formData.email || ""   // Separate email field
+        }),
+      });
 
-    if (!response.ok) {
-      const msg = await response.text();
-      alert(msg || "Failed to register.");
-      return;
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      if (!response.ok) {
+        const msg = await response.text();
+        console.error("Registration failed:", msg);
+        alert(msg || "Failed to register.");
+        return;
+      }
+
+      const result = await response.json();
+      console.log("Registration successful:", result);
+      alert("Registration successful!");
+      navigate(PATHS.LOGIN.path);
+    } catch (error) {
+      console.error("Registration error:", error);
+      console.error("Error type:", error instanceof Error ? error.constructor.name : typeof error);
+      console.error("Error message:", error instanceof Error ? error.message : String(error));
+      
+      if (error instanceof TypeError && error.message === "Failed to fetch") {
+        alert("Cannot connect to server. Please check:\n1. Backend is running at http://localhost:64508\n2. CORS is enabled for localhost:8081\n3. Check browser console for details");
+      } else {
+        alert(`Registration failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
     }
-
-    alert("Registration successful!");
-    navigate(PATHS.LOGIN.path);
   };
 
   return (
