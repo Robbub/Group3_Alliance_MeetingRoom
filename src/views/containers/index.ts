@@ -10,3 +10,4 @@ export * from "./Browse/Browse";
 export * from "./RoomManagement/RoomManagement";
 export * from "./BookingManagement/BookingManagement";
 export * from "./AdminDashboard/AdminDashboard";
+export * from "./BookingRequests/BookingRequests";

@@ -55,6 +55,14 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={PATHS.BOOKING_REQUESTS.path}
+          element={
+            <ProtectedRoute>
+              <Views.BookingRequests />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

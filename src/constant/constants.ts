@@ -68,6 +68,10 @@ export const PATHS = {
     path: "/admin-dashboard",
     label: "Admin Dashboard",
   },
+  BOOKING_REQUESTS: {
+    path: "/booking-requests",
+    label: "Booking Requests",
+  },
   // Add more routes here
 };
 
