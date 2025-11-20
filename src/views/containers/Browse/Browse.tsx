@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "../../../views/components/Header/Header";
 import BookingModal from "../../../views/components/BookingModal/BookingModal";
 import "./Browse.css";
@@ -20,21 +20,44 @@ export const Browse = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const rooms: Room[] = Array.from({ length: 100 }, (_, index) => ({
-    id: index + 1,
-    name: `Room ${index + 1}`,
-    floor: "17th Floor",
-    image: "/assets/meeting-room2.jpg",
-    amenities: [
-      "Smart Boards",
-      "Projection Screens",
-      "Built-in TVs",
-      "Speakers",
-      "Boardroom table with power outlets",
-    ],
-    capacity: 12,
-  }));
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:64508/api/Room/GetRooms");
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch rooms');
+      }
+
+      const data = await response.json();
+      console.log('Fetched rooms:', data);
+      
+      // Transform backend data to match Room interface
+      const formattedRooms: Room[] = data.map((room: any) => ({
+        id: room.roomId,
+        name: room.roomName,
+        floor: room.floorNumber || "Unknown Floor",
+        image: room.roomImage || "/assets/meeting-room2.jpg",
+        amenities: room.amenities?.map((a: any) => a.amenityName) || [],
+        capacity: room.capacity || 0,
+      }));
+      
+      setRooms(formattedRooms);
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      // Keep empty array on error
+      setRooms([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredRooms = rooms.filter((room) => {
     return (
@@ -103,19 +126,29 @@ export const Browse = () => {
         </div>
 
         <div className="rooms-grid">
-          {currentRooms.map((room) => (
-            <div
-              key={room.id}
-              className="room-card"
-              onClick={() => openModal(room)}
-            >
-              <img src={room.image} alt={room.name} className="room-image" />
-              <div className="room-details">
-                <p>{room.floor}</p>
-                <p>{room.name}</p>
-              </div>
+          {loading ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>
+              <p>Loading rooms...</p>
             </div>
-          ))}
+          ) : currentRooms.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>
+              <p>No rooms found</p>
+            </div>
+          ) : (
+            currentRooms.map((room) => (
+              <div
+                key={room.id}
+                className="room-card"
+                onClick={() => openModal(room)}
+              >
+                <img src={room.image} alt={room.name} className="room-image" />
+                <div className="room-details">
+                  <p>{room.floor}</p>
+                  <p>{room.name}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="pagination">
