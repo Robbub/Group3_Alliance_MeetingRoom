@@ -5,6 +5,8 @@ import { Header } from "../../../views/components/Header/Header";
 import { Footer } from "../../../views/components/Footer/Footer";
 import "./Login.css";
 
+const API_BASE_URL = 'http://localhost:49971/api';
+
 export const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const navigate = useNavigate();
@@ -13,19 +15,23 @@ export const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/users");
-      const users = await response.json();
+      const response = await fetch(`${API_BASE_URL}/Account/Login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId: formData.username, 
+          password: formData.password 
+        }),
+      });
 
-      const user = users.find(
-        (u: any) => u.username === formData.username && u.password === formData.password
-      );
+      const data = await response.json();
 
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
+      if (response.ok && data.success) {
+        localStorage.setItem("user", JSON.stringify(data.user));
         alert("Login successful!");
         navigate(PATHS.HOMEPAGE.path);
       } else {
-        alert("Invalid username or password.");
+        alert(data.message || "Invalid username or password.");
       }
     } catch (error) {
       console.error("Error logging in:", error);

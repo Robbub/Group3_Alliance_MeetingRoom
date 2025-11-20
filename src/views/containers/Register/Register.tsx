@@ -4,8 +4,16 @@ import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
 import "./Register.css";
 
+const API_BASE_URL = 'http://localhost:49971/api';
+
 export const Register = () => {
-  const [formData, setFormData] = useState({ username: "", password: "", retypePassword: "" });
+  const [formData, setFormData] = useState({ 
+    username: "", 
+    password: "", 
+    retypePassword: "",
+    firstName: "",
+    lastName: ""
+  });
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,15 +24,32 @@ export const Register = () => {
       return;
     }
 
+    if (!formData.firstName || !formData.lastName) {
+      alert("First name and last name are required!");
+      return;
+    }
+
     try {
-      await fetch("/users", {
+      const response = await fetch(`${API_BASE_URL}/Account/Register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: formData.username, password: formData.password }),
+        body: JSON.stringify({ 
+          userId: formData.username, 
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: "user"
+        }),
       });
 
-      alert("Registration successful!");
-      navigate(PATHS.LOGIN.path);
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Registration successful!");
+        navigate(PATHS.LOGIN.path);
+      } else {
+        alert(data.message || "Registration failed. Please try again.");
+      }
     } catch (error) {
       console.error("Error registering user:", error);
       alert("Failed to register. Please try again.");
@@ -39,7 +64,33 @@ export const Register = () => {
           <h1 className="register-title">CREATE AN ACCOUNT</h1>
           <form className="register-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="username">Username/Email</label>
+              <label htmlFor="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
+                placeholder="Enter your first name"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                value={formData.lastName}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
+                placeholder="Enter your last name"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="username">Username</label>
               <input
                 type="text"
                 id="username"
@@ -47,7 +98,7 @@ export const Register = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, username: e.target.value })
                 }
-                placeholder="Enter your username or email address"
+                placeholder="Enter your username"
                 required
               />
             </div>
