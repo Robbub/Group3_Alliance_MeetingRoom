@@ -35,10 +35,12 @@ export const BookingRequests = () => {
   const fetchBookingRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:64508/api/Bookings");
+      const response = await fetch("http://localhost:64508/api/Booking/GetBookings");
       const data = await response.json();
       
-      // Transform backend data to match our interface
+      console.log("Fetched bookings:", data);
+      
+  
       const formattedRequests: BookingRequest[] = data.map((booking: any) => ({
         id: booking.bookingId,
         requester: `${booking.user?.firstName || ""} ${booking.user?.lastName || ""}`.trim() || "Unknown User",
@@ -99,43 +101,57 @@ export const BookingRequests = () => {
 
   const handleApprove = async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:64508/api/Bookings/${id}/approve`, {
+      console.log("Approving booking with ID:", id);
+      const response = await fetch(`http://localhost:64508/api/Booking/${id}/approve`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
       });
 
+      console.log("Approve response status:", response.status);
+      const responseData = await response.json();
+      console.log("Approve response data:", responseData);
+
       if (response.ok) {
-        setBookingRequests((prev) =>
-          prev.map((request) =>
-            request.id === id ? { ...request, status: "approved" } : request
-          )
-        );
+        console.log("Booking approved successfully, refreshing list...");
+        // Refresh the bookings list to get updated data
+        await fetchBookingRequests();
+      } else {
+        console.error("Failed to approve booking:", responseData);
+        alert(`Failed to approve booking: ${responseData.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error approving booking:", error);
+      alert("Error approving booking. Check console for details.");
     }
   };
 
   const handleReject = async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:64508/api/Bookings/${id}/reject`, {
+      console.log("Rejecting booking with ID:", id);
+      const response = await fetch(`http://localhost:64508/api/Booking/${id}/reject`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
       });
 
+      console.log("Reject response status:", response.status);
+      const responseData = await response.json();
+      console.log("Reject response data:", responseData);
+
       if (response.ok) {
-        setBookingRequests((prev) =>
-          prev.map((request) =>
-            request.id === id ? { ...request, status: "rejected" } : request
-          )
-        );
+        console.log("Booking rejected successfully, refreshing list...");
+        // Refresh the bookings list to get updated data
+        await fetchBookingRequests();
+      } else {
+        console.error("Failed to reject booking:", responseData);
+        alert(`Failed to reject booking: ${responseData.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error rejecting booking:", error);
+      alert("Error rejecting booking. Check console for details.");
     }
   };
 
@@ -185,25 +201,33 @@ export const BookingRequests = () => {
 
             {/* Booking Requests Table */}
             <div className="booking-requests-table-container">
-              {loading ? (
-                <p>Loading booking requests...</p>
-              ) : filteredRequests.length === 0 ? (
-                <p>No booking requests found</p>
-              ) : (
-                <table className="booking-requests-table">
-                  <thead>
+              <table className="booking-requests-table">
+                <thead>
+                  <tr>
+                    <th>Requester</th>
+                    <th>Room</th>
+                    <th>Date & Time</th>
+                    <th>Duration</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
                     <tr>
-                      <th>Requester</th>
-                      <th>Room</th>
-                      <th>Date & Time</th>
-                      <th>Duration</th>
-                      <th>Purpose</th>
-                      <th>Status</th>
-                      <th>Actions</th>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>
+                        Loading booking requests...
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRequests.map((request) => (
+                  ) : filteredRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '20px' }}>
+                        No booking requests found
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRequests.map((request) => (
                       <tr key={request.id}>
                         <td>{request.requester}</td>
                         <td>{request.room}</td>
@@ -243,10 +267,10 @@ export const BookingRequests = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
