@@ -72,6 +72,10 @@ export const PATHS = {
     path: "/booking-requests",
     label: "Booking Requests",
   },
+  RECURRING_MEETINGS: {
+    path: "/recurring-meetings",
+    label: "Recurring Meetings",
+  },
   // Add more routes here
 };
 

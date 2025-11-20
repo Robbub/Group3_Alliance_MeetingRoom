@@ -63,6 +63,14 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={PATHS.RECURRING_MEETINGS.path}
+          element={
+            <ProtectedRoute>
+              <Views.RecurringMeetings />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

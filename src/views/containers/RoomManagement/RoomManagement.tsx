@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FaTrashAlt, FaWrench, FaChevronUp, FaChevronDown, FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
+import { FaTrashAlt, FaWrench, FaSearch, FaPlus } from 'react-icons/fa';
+import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 import { Modal, Button } from 'react-bootstrap';
+import { Sidebar } from '../../components/Sidebar/Sidebar';
+import { Header } from '../../components/Header/Header';
 import './RoomManagement.css';
 import AddRoomModal from '../../components/AddRoomModal/AddRoomModal';
 import EditRoomModal from '../../components/EditRoomModal/EditRoomModal';
-import { Header } from '../../components/Header/Header';
 
 interface Room {
   id: number;
@@ -14,6 +16,7 @@ interface Room {
   capacity: number;
   coverPhoto: string;
   available: boolean;
+  published?: boolean;
 }
 
 interface AddRoomModalProps {
@@ -24,319 +27,344 @@ interface AddRoomModalProps {
 
 export const RoomManagement: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [search, setSearch] = useState('');
+  const [filteredRooms, setFilteredRooms] = useState<Room[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
-  const [sortKey, setSortKey] = useState<keyof Room>('roomName');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [roomsPerPage] = useState(5);
+  const [loading, setLoading] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   
 
   useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/rooms');
-        const data = await response.json();
-        setRooms(data);
-      } catch (error) {
-        console.error('Error fetching rooms:', error);
-      }
-    };
     fetchRooms();
   }, []);
 
-  const handleAddRoom = async (newRoom: Omit<Room, 'id'>) => {
-  try {
-    const response = await fetch('http://localhost:3000/rooms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newRoom), // Let server generate ID
-    });
-    if (!response.ok) throw new Error('Failed to add room');
-    const addedRoom = await response.json();
-    setRooms([...rooms, addedRoom]);
-  } catch (error) {
-    console.error('Error adding room:', error);
-  }
-};
+  useEffect(() => {
+    filterRooms();
+  }, [searchTerm, rooms]);
 
-
-const handleEditRoom = async (updatedRoom: Room) => {
-  try {
-    console.log('Sending to server:', updatedRoom);  // Debug log
-    
-    const response = await fetch(`http://localhost:3000/rooms/${updatedRoom.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedRoom),
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to update room');
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:64508/api/Room/GetRooms');
+      const data = await response.json();
+      console.log('Fetched rooms:', data);
+      setRooms(data);
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    const data = await response.json();
-    console.log('Server response:', data);  // Debug log
-    
-    // for updating local state
-    setRooms(rooms.map(room => 
-      room.id === updatedRoom.id ? updatedRoom : room
-    ));
-  } catch (error) {
-    console.error('Error updating room:', error);
-  
-  }
-};
+  };
 
+  const filterRooms = () => {
+    let filtered = rooms;
 
-const handleDeleteRoom = async () => {
-  if (!currentRoom) return; 
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (room) =>
+          room.roomName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          room.floorNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          room.amenities.some(amenity => amenity.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
 
-  try {
+    setFilteredRooms(filtered);
+  };
 
-    const response = await fetch(
-      `http://localhost:3000/rooms/${currentRoom.id}`,
-      { method: "DELETE" }
-    );
+  const handleAddRoom = async (newRoom: Omit<Room, 'id'>) => {
+    try {
+      const response = await fetch('http://localhost:64508/api/Room/Create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRoom),
+      });
+      if (!response.ok) throw new Error('Failed to add room');
+      await fetchRooms();
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Error adding room:', error);
+      alert('Failed to add room. Please try again.');
+    }
+  };
 
-    if (!response.ok) throw new Error("Failed to delete room");
+  const handleEditRoom = async (updatedRoom: Room) => {
+    try {
+      console.log('Sending to server:', updatedRoom);
+      const response = await fetch(`http://localhost:64508/api/Room/Update/${updatedRoom.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedRoom),
+      });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update room');
+      }
 
-    setRooms((prevRooms) => 
-      prevRooms.filter((room) => room.id !== currentRoom.id)
-    );
-    setShowDeleteModal(false);
+      const data = await response.json();
+      console.log('Server response:', data);
+      await fetchRooms();
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error updating room:', error);
+      alert('Failed to update room. Please try again.');
+    }
+  };
 
-    alert("Room deleted successfully!");
-  } catch (error) {
-    console.error("Delete error:", error);
-    alert("Failed to delete room. Please try again.");
-  }
-};
+  const handleDeleteRoom = async () => {
+    if (!currentRoom) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:64508/api/Room/Delete/${currentRoom.id}`,
+        { method: 'DELETE' }
+      );
+
+      if (!response.ok) throw new Error('Failed to delete room');
+
+      await fetchRooms();
+      setShowDeleteModal(false);
+      setCurrentRoom(null);
+      alert('Room deleted successfully!');
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete room. Please try again.');
+    }
+  };
+
+  const handlePublishRoom = async (room: Room) => {
+    try {
+      const response = await fetch(
+        `http://localhost:64508/api/Room/${room.id}/publish`,
+        { method: 'PUT', headers: { 'Content-Type': 'application/json' } }
+      );
+      if (!response.ok) throw new Error('Failed to publish room');
+      await fetchRooms();
+    } catch (error) {
+      console.error('Error publishing room:', error);
+      alert('Failed to publish room. Please try again.');
+    }
+  };
+
+  const handleUnpublishRoom = async (room: Room) => {
+    try {
+      const response = await fetch(
+        `http://localhost:64508/api/Room/${room.id}/unpublish`,
+        { method: 'PUT', headers: { 'Content-Type': 'application/json' } }
+      );
+      if (!response.ok) throw new Error('Failed to unpublish room');
+      await fetchRooms();
+    } catch (error) {
+      console.error('Error unpublishing room:', error);
+      alert('Failed to unpublish room. Please try again.');
+    }
+  };
 
 const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-  setSearch(e.target.value.trim().toLowerCase());
-  setCurrentPage(1);
-};
-
-const handleSort = (key: keyof Room) => {
-  if (key === sortKey) {
-    setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-  } else {
-    setSortKey(key);
-    setSortDirection('asc');
-  }
-  setCurrentPage(1);
-};
-
-const filteredRooms = rooms.filter(room => {
-  return room.roomName.toLowerCase().includes(search) ||
-          room.floorNumber.toString().includes(search) ||
-          room.amenities.some(amenity => amenity.toLowerCase().includes(search)) ||
-          room.capacity.toString().includes(search);
-}
-);
-
-
-const sortedRooms = filteredRooms.slice().sort((a, b) => {
-  const aVal = a[sortKey];
-  const bVal = b[sortKey];
-
-  if (aVal == null && bVal == null) return 0;
-  if (aVal == null) return sortDirection === 'asc' ? 1 : -1;
-  if (bVal == null) return sortDirection === 'asc' ? -1 : 1;
-
-  if (typeof aVal === 'string' && typeof bVal === 'string') {
-    return sortDirection === 'asc'
-      ? aVal.localeCompare(bVal)
-      : bVal.localeCompare(aVal);
-  }
-
-  if (typeof aVal === 'number' && typeof bVal === 'number') {
-    return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-  }
-
-  if (Array.isArray(aVal) && Array.isArray(bVal)) {
-    const aStr = aVal.join(', ').toLowerCase();
-    const bStr = bVal.join(', ').toLowerCase();
-    return sortDirection === 'asc'
-      ? aStr.localeCompare(bStr)
-      : bStr.localeCompare(aStr);
-  }
-
-  return 0;
-});
-
-const totalPages = Math.max(1, Math.ceil(sortedRooms.length / roomsPerPage));
-const safeCurrentPage = Math.max(1, Math.min(currentPage, totalPages));
-const indexOfLastRoom = safeCurrentPage * roomsPerPage;
-const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
-const currentRooms = sortedRooms.slice(indexOfFirstRoom, indexOfLastRoom);
-
+    setSearchTerm(e.target.value);
+  };
 
   return (
-    <div className="room-management-page">
+    <>
       <Header />
-      <div className="room-management-content">
-        <div className="room-management-header">
-          <p className="manage-rooms-heading">Manage Rooms</p>
-          <div className="search-and-add">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search rooms..."
-              value={search}
-              onChange={handleSearch}
+      <div className="admin-layout">
+        <Sidebar collapsed={sidebarCollapsed} />
+        <div className="admin-content">
+          <div className="room-management-main">
+            <div className="room-management-header">
+              <button
+                className="sidebar-toggle-btn"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {sidebarCollapsed ? <GoSidebarCollapse /> : <GoSidebarExpand />}
+              </button>
+              <div>
+                <h1>Meeting Rooms</h1>
+                <p className="page-subtitle">Manage and configure meeting rooms</p>
+              </div>
+              <button 
+                className="add-room-btn-header"
+                onClick={() => setShowAddModal(true)}
+              >
+                <FaPlus /> Add Room
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="room-management-controls">
+              <div className="search-box">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by room name, floor, or amenities..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                />
+              </div>
+            </div>
+
+            {/* Rooms Table */}
+            <div className="room-management-table-container">
+              <table className="room-management-table">
+                <thead>
+                  <tr>
+                    <th>Room Name</th>
+                    <th>Floor</th>
+                    <th>Capacity</th>
+                    <th>Amenities</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>
+                        Loading rooms...
+                      </td>
+                    </tr>
+                  ) : filteredRooms.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>
+                        No rooms found
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRooms.map((room) => (
+                      <tr key={room.id}>
+                        <td>{room.roomName}</td>
+                        <td>{room.floorNumber}</td>
+                        <td>{room.capacity}</td>
+                        <td>
+                          <div className="amenities-list">
+                            {room.amenities && room.amenities.length > 0 ? (
+                              room.amenities.map((amenity, i) => (
+                                <span key={i} className="amenity-badge">{amenity}</span>
+                              ))
+                            ) : (
+                              <span className="amenity-badge">None</span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`status-badge ${room.published ? 'published' : 'unpublished'}`}>
+                            {room.published ? 'Published' : 'Unpublished'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            {room.published ? (
+                              <button
+                                className="action-btn unpublish-btn"
+                                onClick={() => handleUnpublishRoom(room)}
+                                title="Unpublish"
+                              >
+                                Hide
+                              </button>
+                            ) : (
+                              <button
+                                className="action-btn publish-btn"
+                                onClick={() => handlePublishRoom(room)}
+                                title="Publish"
+                              >
+                                Publish
+                              </button>
+                            )}
+                            <button 
+                              className="action-btn edit-btn"
+                              onClick={() => {
+                                setCurrentRoom(room);
+                                setShowEditModal(true);
+                              }}
+                              title="Edit"
+                            >
+                              <FaWrench />
+                            </button>
+                            <button 
+                              className="action-btn delete-btn"
+                              onClick={() => {
+                                setCurrentRoom(room);
+                                setShowDeleteModal(true);
+                              }}
+                              title="Delete"
+                            >
+                              <FaTrashAlt />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Modals */}
+            <AddRoomModal
+              show={showAddModal}
+              onHide={() => setShowAddModal(false)}
+              onSave={handleAddRoom}
+              existingRooms={rooms}
             />
-            <button 
-              className="add-room-btn" 
-              onClick={() => setShowAddModal(true)}
-            >
-              Add New Room
-            </button>
-          </div>
-        </div>
 
-        <div className="room-table-wrapper">
-          <table className="room-table">
-            <thead>
-              <tr>
-                {/* <th onClick={() => handleSort('roomName')}>
-                  Room Name {sortKey === 'roomName' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th>
-                <th onClick={() => handleSort('floorNumber')}>
-                  Floor {sortKey === 'floorNumber' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th> */}
-                {/* <th onClick={() => handleSort('capacity')}>
-                  Capacity {sortKey === 'capacity' && (sortDirection === 'asc' ? <FaChevronUp /> : <FaChevronDown />)}
-                </th> */}
-                <th>Room Name</th>
-                <th>Floor Number</th>
-                <th>Amenities</th>
-                <th>Capacity</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentRooms.map(room => (
-                <tr key={room.id}>
-                  <td>{room.roomName}</td>
-                  <td>{room.floorNumber}</td>
-                  <td>
-                    <div className="amenities-list">
-                      {room.amenities.map((amenity, i) => (
-                        <span key={i} className="amenity-badge">{amenity}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td>{room.capacity}</td>
-                  <td>
-                    <div className="action-buttons">
-                      <button 
-                        className="action-btn" 
-                        onClick={() => {
-                          setCurrentRoom(room);
-                          setShowEditModal(true);
-                        }}
-                      >
-                        <FaWrench />
-                      </button>
-                      <button 
-                        className="action-btn delete" 
-                        onClick={() => {
-                          setCurrentRoom(room);
-                          setShowDeleteModal(true);
-                        }}
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            {currentRoom && (
+              <EditRoomModal
+                show={showEditModal}
+                onHide={() => {
+                  setShowEditModal(false);
+                  setCurrentRoom(null);
+                }}
+                room={currentRoom}
+                onSave={handleEditRoom}
+              />
+            )}
 
-          <div className="pagination">
-            <button 
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              <FaChevronCircleLeft />
-            </button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button 
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              <FaChevronCircleRight />
-            </button>
-          </div>
-
-        <AddRoomModal
-          show={showAddModal}
-          onHide={() => setShowAddModal(false)}
-          onSave={handleAddRoom}
-          existingRooms={rooms}
-        />
-
-        {currentRoom && (
-          <EditRoomModal
-            show={showEditModal}
-            onHide={() => setShowEditModal(false)}
-            room={currentRoom}
-            onSave={handleEditRoom}
-          />
-        )}
-
-        {currentRoom && (
-          <Modal 
-            show={showDeleteModal} 
-            onHide={() => {
-              setShowDeleteModal(false);
-              setCurrentRoom(null);
-            }}
-            
-           
-            keyboard={false}
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-            dialogClassName="modal-dialog-centered"
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>Confirm Deletion</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              Are you sure you want to delete <strong>{currentRoom.roomName}</strong>? 
-              This will also delete all bookings for this room.
-            </Modal.Body>
-            <Modal.Footer>
-              <Button 
-                variant="secondary" 
-                onClick={() => {
+            {currentRoom && (
+              <Modal 
+                show={showDeleteModal} 
+                onHide={() => {
                   setShowDeleteModal(false);
                   setCurrentRoom(null);
                 }}
+                keyboard={false}
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+                dialogClassName="modal-dialog-centered"
               >
-                Cancel
-              </Button>
-              <Button 
-               
-                variant="danger"
-                className="delete-btn"
-                onClick={() => handleDeleteRoom()} 
-              >
-                Delete
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        )}
-      </div> 
-    </div> 
-  </div>
+                <Modal.Header closeButton>
+                  <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  Are you sure you want to delete <strong>{currentRoom.roomName}</strong>? 
+                  This will also delete all bookings for this room.
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setCurrentRoom(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="danger"
+                    className="delete-btn"
+                    onClick={() => handleDeleteRoom()} 
+                  >
+                    Delete
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };

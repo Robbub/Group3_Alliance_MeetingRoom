@@ -168,7 +168,7 @@ export const BookingRequests = () => {
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {sidebarCollapsed ? <GoSidebarExpand /> : <GoSidebarCollapse />}
+              {sidebarCollapsed ? <GoSidebarCollapse /> : <GoSidebarExpand />}
               </button>
               <div>
                 <h1>Booking Requests</h1>
