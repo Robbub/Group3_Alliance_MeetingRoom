@@ -92,14 +92,14 @@ export const AdminDashboard = () => {
       changeType: "",
       icon: <FaCalendarAlt />,
     },
-    {
-      title: "Completion Rate",
-      value: `${stats.completionRate}%`,
-      subtitle: "Last 30 days",
-      change: stats.completionRate >= 90 ? "↑ Excellent!" : "Room for improvement",
-      changeType: stats.completionRate >= 90 ? "increase" : "decrease",
-      icon: <FaChartLine />,
-    },
+    // {
+    //   title: "Completion Rate",
+    //   value: `${stats.completionRate}%`,
+    //   subtitle: "Last 30 days",
+    //   change: stats.completionRate >= 90 ? "↑ Excellent!" : "Room for improvement",
+    //   changeType: stats.completionRate >= 90 ? "increase" : "decrease",
+    //   icon: <FaChartLine />,
+    // },
   ];
 
   return (
