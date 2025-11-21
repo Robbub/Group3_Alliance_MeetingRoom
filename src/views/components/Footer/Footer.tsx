@@ -10,8 +10,8 @@ export const Footer = () => {
           <img src="/assets/summit-logo.png" alt="SUMMITFLOW" className="footer-logo" />
           <p>
             Lorem ipsum dolor sit amet, consectetur 
-            adipiscing elit, sed do eiusmod tempor incididunt 
-            ut labore et dolore magna aliqua.
+            adipiscing elit, sed do eiusmod el dorado call me baby love me right
+            thinder leet me in
           </p>
         </div>
         <div className="footer-section">

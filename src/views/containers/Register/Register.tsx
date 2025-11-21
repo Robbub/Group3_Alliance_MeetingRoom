@@ -8,9 +8,15 @@ import "./Register.css";
 const API_BASE_URL = 'http://localhost:64508/api';
 
 export const Register = () => {
+<<<<<<< HEAD
   const [formData, setFormData] = useState({ 
     username: "", 
     password: "", 
+=======
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+>>>>>>> origin/main
     retypePassword: "",
     firstName: "",
     lastName: ""
@@ -31,6 +37,7 @@ export const Register = () => {
     }
 
     try {
+<<<<<<< HEAD
       const response = await fetch(`${API_BASE_URL}/Account/Register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,6 +47,16 @@ export const Register = () => {
           firstName: formData.firstName,
           lastName: formData.lastName,
           role: "user"
+=======
+      await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName
+>>>>>>> origin/main
         }),
       });
 
@@ -103,6 +120,37 @@ export const Register = () => {
                 required
               />
             </div>
+
+            {/* First & Last Name Fields */}
+            <div className="form-group name-fields">
+              <div>
+                <label htmlFor="firstName">First Name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
+                  placeholder="First Name"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="lastName">Last Name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
+                  placeholder="Last Name"
+                  required
+                />
+              </div>
+            </div>
+
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input
@@ -131,9 +179,6 @@ export const Register = () => {
             </div>
             <button type="submit" className="register-button">
               Sign Up
-            </button>
-            <button className="company-email-button">
-              Continue with Company Email
             </button>
           </form>
           <div className="login-link">

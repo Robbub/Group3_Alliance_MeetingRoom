@@ -1,0 +1,58 @@
+{
+  "statistics": [
+    {
+      "report1": "Sample Response 1"
+    },
+    {
+      "report2": "Sample Response 2"
+    }
+  ],
+  "participants": [
+    { "id": 1, "name": "John Doe" },
+    { "id": 2, "name": "Jane Smith" },
+    { "id": 3, "name": "Alice Johnson" },
+    { "id": 4, "name": "Bob Brown" },
+    { "id": 5, "name": "Charlie Davis" }
+  ],
+  "users": [
+    {
+      "username": "jack",
+      "password": "password"
+    }
+  ],
+  "bookingOverTimeData": [
+    { "time": "9:00 AM", "bookings": 1 },
+    { "time": "10:00 AM", "bookings": 3 },
+    { "time": "11:00 AM", "bookings": 2 },
+    { "time": "12:00 PM", "bookings": 4 },
+    { "time": "1:00 PM", "bookings": 3 },
+    { "time": "2:00 PM", "bookings": 2 },
+    { "time": "3:00 PM", "bookings": 3 },
+    { "time": "4:00 PM", "bookings": 1 }
+  ],
+  "totalBookingsPerRoomData": [
+    { "name": "A100's", "bookings": 7 },
+    { "name": "B100's", "bookings": 6 },
+    { "name": "C100's", "bookings": 3 }
+  ],
+  "bookingsPerUserData": [
+    { "name": "Zekken", "bookings": 1 },
+    { "name": "pewds", "bookings": 7 },
+    { "name": "brucewayne", "bookings": 5 },
+    { "name": "tenz", "bookings": 8 },
+    { "name": "MJF", "bookings": 4 },
+    { "name": "proCreate", "bookings": 4 },
+    { "name": "f0rsaken", "bookings": 4 },
+    { "name": "jasonmraz", "bookings": 4 }
+  ],
+  "meetingTypesData": [
+    { "name": "Planned Schedule", "value": 53 },
+    { "name": "Onsite Schedule", "value": 37 }
+  ],
+  "meetingRoomAnalyticsData": [
+    { "name": "Board Room", "value": 30 },
+    { "name": "Conference Room", "value": 25 },
+    { "name": "Meeting Room", "value": 20 },
+    { "name": "Training Room", "value": 25 }
+  ]
+}

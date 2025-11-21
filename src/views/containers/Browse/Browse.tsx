@@ -162,61 +162,61 @@ export const Browse = () => {
       </div>
 
       {isModalOpen && selectedRoom && (
-        <div className="modal" onClick={closeModal}>
-          <div className="modal-wrapper">
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="browse-modal-content" onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
             <button
-              className="modal-arrow modal-arrow-left"
+              className="browse-modal-arrow browse-modal-arrow-left"
+              style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
               onClick={(e) => {
                 e.stopPropagation();
                 navigateRoom(-1);
               }}
             >
-              <FaChevronLeft />
+              &#x2039;
             </button>
-
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <span className="close" onClick={closeModal}>
-                &times;
-              </span>
-
-              <img
-                src={selectedRoom.image}
-                alt={selectedRoom.name}
-                className="modal-image"
-              />
-
-              <div className="modal-details">
-                <h2>{selectedRoom.name.toUpperCase()}</h2>
-                <p><strong>FLOOR:</strong> {selectedRoom.floor}</p>
-                <p><strong>AMENITIES:</strong></p>
-                <ul>
-                  {selectedRoom.amenities.map((amenity, index) => (
-                    <li key={index}>{amenity}</li>
-                  ))}
-                </ul>
-                <p><strong>Capacity:</strong> {selectedRoom.capacity}</p>
-
-                <button
-                  className="book-button"
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setShowBookingModal(true);
-                  }}
-                >
-                  BOOK
-                </button>
-              </div>
-            </div>
-
             <button
-              className="modal-arrow modal-arrow-right"
+              className="browse-modal-arrow browse-modal-arrow-right"
+              style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
               onClick={(e) => {
                 e.stopPropagation();
                 navigateRoom(1);
               }}
             >
-              <FaChevronRight />
+              &#x203A;
             </button>
+            <span className="close" onClick={closeModal} style={{ position: 'absolute', top: 20, right: 25 }}>
+              &times;
+            </span>
+            <div style={{ width: 320, height: 200, marginBottom: 0 }}>
+              <img
+                src={selectedRoom.image}
+                alt={selectedRoom.name}
+                className="modal-image"
+              />
+            </div>
+            <div className="modal-divider"></div>
+            <div className="modal-details">
+              <h2>{selectedRoom.name.toUpperCase()}</h2>
+              <p className="modal-label">FLOOR</p>
+              <p>{selectedRoom.floor}</p>
+              <p className="modal-label">AMENITIES</p>
+              <ul>
+                {selectedRoom.amenities.map((amenity, index) => (
+                  <li key={index}>{amenity}</li>
+                ))}
+              </ul>
+              <p className="modal-label" style={{ marginTop: 10 }}>CAPACITY</p>
+              <p style={{ fontWeight: 700, fontSize: 18 }}>{selectedRoom.capacity}</p>
+              <button
+                className="book-button"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setShowBookingModal(true);
+                }}
+              >
+                BOOK
+              </button>
+            </div>
           </div>
         </div>
       )}

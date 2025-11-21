@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import * as Views from "./views/containers";
 import { PATHS } from "./constant";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -68,6 +68,43 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Views.RecurringMeetings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.BOOKING_MANAGEMENT.path}
+          element={
+            <ProtectedRoute>
+              <Views.BookingManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.SETTINGS.path}
+          element={
+            <ProtectedRoute>
+              <Views.Settings />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="account" element={<Views.AccountSettings />} />
+          <Route path="security" element={<Views.SecuritySettings />} />
+          <Route path="notifications" element={<Views.NotificationSettings />} />
+          <Route path="appearance" element={<Views.AppearanceSettings />} />
+        </Route>
+        <Route
+          path={PATHS.ANALYTICS.path}
+          element={
+            <ProtectedRoute>
+              <Views.Analytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.USER_MANAGEMENT.path}
+          element={
+            <ProtectedRoute>
+              <Views.UserManagement />
             </ProtectedRoute>
           }
         />

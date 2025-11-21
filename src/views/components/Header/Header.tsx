@@ -1,12 +1,12 @@
-// src/components/Header/Header.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { FaBars, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaUserCircle, FaBell } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
+import { User } from "./UserType";
 import "./Header.css";
 
 export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const navigate = useNavigate();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   // [get current user from localStorage
@@ -19,16 +19,23 @@ export const Header = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  const toggleNotifications = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("user"); 
-    navigate("/login"); 
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as Node;
-      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
-        setIsDropdownOpen(false);
-      }
+    if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+      setIsDropdownOpen(false);
+    }
+    if (notifRef.current && !notifRef.current.contains(target)) {
+      setIsNotificationOpen(false);
+    }
   };
 
   useEffect(() => {

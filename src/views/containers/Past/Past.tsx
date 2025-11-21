@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
 import "./Past.css";
@@ -40,12 +41,8 @@ export const Past = () => {
         <Header />
         <h1 className="past-bookings-title">Past Bookings</h1>
         <div className="past-tabs">
-          <button className="past-tab-button">
-            <a href="/upcoming">Upcoming</a>
-          </button>
-          <button className="past-tab-button active">
-            <a href="/past">Past</a>
-          </button>
+          <Link to="/upcoming" className="past-tab-button">Upcoming</Link>
+          <Link to="/past" className="past-tab-button active">Past</Link>
         </div>
         <div className="past-bookings-list">
           {bookings.map((booking) => (

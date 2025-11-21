@@ -106,3 +106,12 @@
   color: #64442F;
   text-decoration: none;
 }
+
+.name-fields {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.name-fields > div {
+  flex: 1;
+}

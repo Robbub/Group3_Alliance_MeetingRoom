@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { Header } from "../../components/Header/Header";
+import { Header } from "../../../views/components/Header/Header";
 import "./BookingManagement.css";
 
 export const BookingManagement = () => {

@@ -20,12 +20,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, onClose }) => {
     floor: room.floor,
     roomName: room.name,
     date: "",
-    timeSlot: "",
+    startTime: "",
+    endTime: "",
     recurring: false,
     purpose: "",
     participantInput: "",
     participants: [] as string[],
+    frequency: "",
+    recurringStartDate: "",
+    recurringEndDate: "",
+    daysOfWeek: [] as string[],
   });
+
+  const [error, setError] = useState<string>("");
 
   const addParticipant = () => {
     if (
@@ -47,17 +54,54 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, onClose }) => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Booking submitted:", formData);
-    alert("Booking submitted!");
-    onClose(false);
+    setError("");
+    // Validation
+    const date = formData.recurring ? formData.recurringStartDate : formData.date;
+    if (!formData.roomName || !formData.floor || !date || !formData.startTime || !formData.endTime) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    if (formData.endTime <= formData.startTime) {
+      setError("End time must be after start time.");
+      return;
+    }
+    const bookingData = {
+      ...formData,
+      roomId: room.id,
+      roomName: formData.roomName,
+      floor: formData.floor,
+      date: date,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      purpose: formData.purpose,
+      participants: formData.participants,
+      recurring: formData.recurring,
+      frequency: formData.frequency,
+      recurringEndDate: formData.recurringEndDate,
+      daysOfWeek: formData.daysOfWeek,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      await fetch("http://localhost:3000/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
+      });
+      alert("Booking submitted!");
+      onClose(false);
+    } catch (err) {
+      setError("Failed to save booking.");
+    }
   };
 
   return (
-    <div className="booking-modal-overlay" onClick={() => onClose(true)}>
+    <div className="modal-overlay" onClick={() => onClose(true)}>
       <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
         <h2 className="modal-title">Booking Details</h2>
+
+        {error && <div style={{ color: 'red', marginBottom: 12, textAlign: 'center' }}>{error}</div>}
 
         <form className="booking-form" onSubmit={handleSubmit}>
           {/* Floor Number */}
@@ -94,26 +138,29 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, onClose }) => {
               <label>Date</label>
               <input
                 type="date"
-                value={formData.date}
+                value={formData.recurring ? formData.recurringStartDate : formData.date}
                 onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
+                  formData.recurring
+                    ? setFormData({ ...formData, recurringStartDate: e.target.value })
+                    : setFormData({ ...formData, date: e.target.value })
                 }
               />
             </div>
             <div className="form-group">
-              <label>Time Slot</label>
-              <select
-                value={formData.timeSlot}
-                onChange={(e) =>
-                  setFormData({ ...formData, timeSlot: e.target.value })
-                }
-              >
-                <option value="">00:00 - 00:00</option>
-                <option>08:00 - 10:00</option>
-                <option>10:00 - 12:00</option>
-                <option>13:00 - 15:00</option>
-                <option>15:00 - 17:00</option>
-              </select>
+              <label>Start Time</label>
+              <input
+                type="time"
+                value={formData.startTime}
+                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+              />
+            </div>
+            <div className="form-group">
+              <label>End Time</label>
+              <input
+                type="time"
+                value={formData.endTime}
+                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+              />
             </div>
           </div>
 
@@ -175,6 +222,77 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, onClose }) => {
             </div>
           </div>
         </form>
+
+        {formData.recurring && (
+          <div className="recurring-form" style={{ marginTop: 20 }}>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Frequency</label>
+                <select
+                  value={formData.frequency}
+                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                >
+                  <option value="">Select</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>End Date</label>
+                <input
+                  type="date"
+                  value={formData.recurringEndDate}
+                  min={formData.recurringStartDate}
+                  onChange={(e) => setFormData({ ...formData, recurringEndDate: e.target.value })}
+                />
+              </div>
+            </div>
+            {formData.frequency === 'weekly' && (
+              <div className="form-group">
+                <label>Days of Week</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                    <label key={day} style={{ fontWeight: 400 }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.daysOfWeek?.includes(day) || false}
+                        onChange={(e) => {
+                          const days = formData.daysOfWeek || [];
+                          setFormData({
+                            ...formData,
+                            daysOfWeek: e.target.checked
+                              ? [...days, day]
+                              : days.filter((d) => d !== day),
+                          });
+                        }}
+                      />
+                      {day}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="form-row">
+              <div className="form-group">
+                <label>Start Time</label>
+                <input
+                  type="time"
+                  value={formData.startTime}
+                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>End Time</label>
+                <input
+                  type="time"
+                  value={formData.endTime}
+                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
