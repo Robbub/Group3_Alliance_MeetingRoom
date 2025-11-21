@@ -16,7 +16,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     { path: "/recurring-meetings", label: "Recurring Meetings", icon: <FaRedoAlt /> },
     { path: "/roommanagement", label: "Meeting Rooms", icon: <FaDoorOpen /> },
     { path: "/users", label: "Users", icon: <FaUsers /> },
-    { path: "/settings", label: "Settings", icon: <FaCog /> },
+    // { path: "/settings", label: "Settings", icon: <FaCog /> },
   ];
 
   return (
