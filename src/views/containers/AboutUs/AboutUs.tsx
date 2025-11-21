@@ -1,5 +1,6 @@
 import React from "react";
 import { Header } from "../../components/Header/Header";
+import { Footer } from "../../../views/components/Footer/Footer";
 import { useNavigate } from "react-router-dom";
 import "./AboutUs.css";
 
@@ -96,6 +97,7 @@ export const AboutUs = () => {
             </div>
           </section>
         </div>
+      <Footer />
     </div>
   );
 };

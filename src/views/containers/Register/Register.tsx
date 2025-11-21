@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
+import { Footer } from "../../../views/components/Footer/Footer";
 import "./Register.css";
 
 const API_BASE_URL = 'http://localhost:64508/api';
@@ -140,6 +141,7 @@ export const Register = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

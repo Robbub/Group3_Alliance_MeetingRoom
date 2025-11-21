@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
+import { Footer } from "../../../views/components/Footer/Footer";
 import "./Homepage.css";
 
 export const Homepage = () => {
@@ -27,6 +28,7 @@ export const Homepage = () => {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
