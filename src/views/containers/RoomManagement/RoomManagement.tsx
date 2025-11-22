@@ -19,6 +19,7 @@ interface Room {
   capacity: number;
   coverPhoto: string;
   available: boolean;
+  published?: boolean;
 }
 
 const API_BASE_URL = "https://localhost:3150/api/Room"; // Backend API base URL
@@ -248,7 +249,7 @@ const RoomManagement: React.FC = () => {
   };
 
   return (
-    <div className="room-management-page">
+    <>
       <Header />
       <div className="room-management-content">
         <div className="room-management-header">

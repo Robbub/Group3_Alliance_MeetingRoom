@@ -208,7 +208,25 @@ export const Browse = () => {
                 <p>{room.name}</p>
               </div>
             </div>
-          ))}
+          ) : currentRooms.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>
+              <p>No rooms found</p>
+            </div>
+          ) : (
+            currentRooms.map((room) => (
+              <div
+                key={room.id}
+                className="room-card"
+                onClick={() => openModal(room)}
+              >
+                <img src={room.image} alt={room.name} className="room-image" />
+                <div className="room-details">
+                  <p>{room.floor}</p>
+                  <p>{room.name}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {totalPages > 1 && (

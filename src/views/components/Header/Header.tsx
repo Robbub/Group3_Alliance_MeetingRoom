@@ -8,10 +8,12 @@ export const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-
-  const currentUser: User | null = JSON.parse(localStorage.getItem("user") || "null");
+  
+  // [get current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+  
+  // check if on login/register page
+  const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -46,56 +48,24 @@ export const Header = () => {
   return (
     <header className="header">
       <div className="logo">
-        <Link to="/homepage">
+        <Link to="/">
           <img src="/assets/summit-logo.png" alt="SUMMITFLOW" />
         </Link>
       </div>
-
       <nav className="nav-links">
-        <Link to="/homepage" className="nav-item">HOME</Link>
-        <Link to="/browse" className="nav-item">BROWSE ROOMS</Link>
-
-        <div className="manage-dropdown">
-          <span className="manage-label">MANAGE ▾</span>
-          <div className="manage-options">
-            <Link to={
-              currentUser?.role === "admin" || currentUser?.role === "super admin"
-                ? "/roommanagement"  // Changed from "/admin" to "/roommanagement"
-                : "/upcoming"
-            }>
-              Manage Rooms
-            </Link>
-            {(currentUser?.role === "admin" || currentUser?.role === "super admin") && (
-              <Link to="/usermanagement">Manage Users</Link>
-            )}
-          </div>
-        </div>
-
-        <Link to="/bookingmanagement" className="nav-item">CALENDAR</Link>
+        <Link to="/about">ABOUT US</Link>
+        <Link to="/browse">BROWSE</Link>
+        <Link to={currentUser?.username === "admin" ? "/dashboard" : "/upcoming"}>
+          MANAGE
+        </Link>
       </nav>
-
-      <div className="icon-group">
-        <div className="notification-icon" ref={notifRef}>
-          <button onClick={toggleNotifications}>
-            <FaBell className="menu-icon" />
-          </button>
-          {isNotificationOpen && (
-            <div className="notification-dropdown">
-              <h4>Notifications</h4>
-              <ul className="notification-list">
-                <li><span>🔔</span> You have an upcoming meeting at 3PM</li>
-                <li><span>🔔</span> Reminder: 'Marketing Sync' starts in 15 minutes.</li>
-                <li><span>✉️</span> You've been invited to 'Project Planning'</li>
-                <li><span>✉️</span> Chris has invited you to a meeting</li>
-                <li><span>❌</span> You missed your meeting: 'Q2 Budget Review'</li>
-                <li><span>❌</span> No-show: 'Client Briefing' went unattended.</li>
-                <li><span>✔️</span> You accepted 'Weekly Sync'</li>
-              </ul>
-              <Link className="view-all" to="/notifications">View All Notifications</Link>
-            </div>
-          )}
-        </div>
-
+      
+      {/* show Login button if not logged in (and not on auth pages), otherwise show user menu */}
+      {!currentUser && !isAuthPage ? (
+        <button className="login-button" onClick={() => navigate("/login")}>
+          Log-in
+        </button>
+      ) : currentUser ? (
         <div className="user-menu" ref={dropdownRef}>
           <button className="dropdown-toggle" onClick={toggleDropdown}>
             <FaBars className="menu-icon" />
@@ -103,21 +73,21 @@ export const Header = () => {
           </button>
           {isDropdownOpen && (
             <div className="dropdown-content">
-              {currentUser && (
-                <div className="user-info">
-                  Logged in as: {currentUser.username}
-                </div>
-              )}
-              <Link to="/settings">Settings</Link>
-              {currentUser && (
-                <button onClick={handleLogout} className="logout-button">
-                  Logout
-                </button>
-              )}
+              {/* show username if logged in */}
+              <div className="user-info">
+                Logged in as: {currentUser.username}
+              </div>
+              <Link to="/notifications">Notifications</Link>
+              <hr />
+              <Link to="/help-center">Help Center</Link>
+              <Link to="/preferences">Preferences</Link>
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
             </div>
           )}
         </div>
-      </div>
+      ) : null}
     </header>
   );
 };

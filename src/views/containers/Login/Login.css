@@ -11,7 +11,7 @@ body {
 
 .login-container {
   max-width: 400px;
-  margin: 90px auto;
+  margin: 140px auto 40px auto;
   padding: 20px;
   font-family: Arial, sans-serif;
   background-color: white;
@@ -59,8 +59,8 @@ body {
   color: #64442F;
 }
 
-.login-button {
-  width: 100%;
+.login-container .login-button {
+  width: 100% !important;
   padding: 10px;
   background-color: #9C6644;
   color: white;
@@ -69,15 +69,12 @@ body {
   cursor: pointer;
   font-size: 16px;
   margin-top: 10px;
+  box-sizing: border-box;
+  display: block;
 }
 
-.login-button a {
-  text-decoration: none;
-  color: white;
-}
-
-.company-email-button {
-  width: 100%;
+.login-container .company-email-button {
+  width: 100% !important;
   padding: 10px;
   background-color: #EDE0D4;
   color: #64442F;
@@ -86,6 +83,8 @@ body {
   cursor: pointer;
   font-size: 16px;
   margin-top: 10px;
+  box-sizing: border-box;
+  display: block;
 }
 
 .signup-link {

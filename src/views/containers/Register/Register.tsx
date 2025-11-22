@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { PATHS } from "../../../constant";
 import { Header } from "../../../views/components/Header/Header";
+import { Footer } from "../../../views/components/Footer/Footer";
 import "./Register.css";
 
+const API_BASE_URL = 'http://localhost:64508/api';
+
 export const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "", 
-    password: "",
+  const [formData, setFormData] = useState({ 
+    username: "", 
+    password: "", 
     retypePassword: "",
     firstName: "",
     lastName: ""
@@ -46,6 +48,29 @@ export const Register = () => {
       const msg = await response.text();
       alert(msg || "Failed to register.");
       return;
+      const response = await fetch(`${API_BASE_URL}/Account/Register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId: formData.username, 
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: "user"
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Registration successful!");
+        navigate(PATHS.LOGIN.path);
+      } else {
+        alert(data.message || "Registration failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error registering user:", error);
+      alert("Failed to register. Please try again.");
     }
 
     alert("Registration successful!");
@@ -152,8 +177,12 @@ export const Register = () => {
               Sign Up
             </button>
           </form>
+          <div className="login-link">
+            Already have an account? <a href="/login">Log In</a>
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

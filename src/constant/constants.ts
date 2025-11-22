@@ -27,6 +27,10 @@ export const PATHS = {
     path: "/",
     label: "Homepage",
   },
+  ABOUT_US: {
+    path: "/about",
+    label: "About Us",
+  },
   UPCOMING: {
     path: "/upcoming",
     label: "Upcoming",
@@ -70,6 +74,18 @@ export const PATHS = {
   BOOK_ROOMS: {
     path: "/book/rooms",
     label: "Book Rooms"
+  },
+  ADMIN_DASHBOARD: {
+    path: "/admin-dashboard",
+    label: "Admin Dashboard",
+  },
+  BOOKING_REQUESTS: {
+    path: "/booking-requests",
+    label: "Booking Requests",
+  },
+  RECURRING_MEETINGS: {
+    path: "/recurring-meetings",
+    label: "Recurring Meetings",
   },
   // Add more routes here
 };

@@ -8,10 +8,11 @@ export const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
+        <Route path={PATHS.HOMEPAGE.path} element={<Views.Homepage />} />
         <Route path={PATHS.LOGIN.path} element={<Views.Login />} />
         <Route path={PATHS.REGISTER.path} element={<Views.Register />} />
+        <Route path={PATHS.ABOUT_US.path} element={<Views.AboutUs />} />
         <Route path={PATHS.NOT_FOUND.path} element={<Views.NotFound />} />
-        <Route path={PATHS.HOMEPAGE.path} element={<Views.Homepage />} />
 
         {/* Protected Routes */}
         <Route
@@ -42,7 +43,7 @@ export const AppRoutes = () => {
           path={PATHS.DASHBOARD.path}
           element={
             <ProtectedRoute>
-              <Views.Dashboard />
+              <Views.AdminDashboard />
             </ProtectedRoute>
           }
         />
@@ -51,6 +52,22 @@ export const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <Views.RoomManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.BOOKING_REQUESTS.path}
+          element={
+            <ProtectedRoute>
+              <Views.BookingRequests />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={PATHS.RECURRING_MEETINGS.path}
+          element={
+            <ProtectedRoute>
+              <Views.RecurringMeetings />
             </ProtectedRoute>
           }
         />
@@ -83,8 +100,6 @@ export const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-
-        {/* New User Management Route */}
         <Route
           path={PATHS.USER_MANAGEMENT.path}
           element={
