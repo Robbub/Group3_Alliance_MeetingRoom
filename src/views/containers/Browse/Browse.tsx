@@ -1,69 +1,142 @@
+// Replace the entire Browse component with this fixed version:
 import React, { useState, useEffect } from "react";
 import { Header } from "../../../views/components/Header/Header";
 import BookingModal from "../../../views/components/BookingModal/BookingModal";
 import "./Browse.css";
+import { useSearchParams } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-type Room = {
+interface Amenity {
+  id: number;
+  name: string;
+  description: string;
+}
+
+interface Room {
   id: number;
   name: string;
   floor: string;
   image: string;
   amenities: string[];
   capacity: number;
-};
+}
+
+// Backend API configuration
+const API_BASE_URL = "https://localhost:3150/api/Room";
 
 export const Browse = () => {
+  const [allRooms, setAllRooms] = useState<Room[]>([]);
+  const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchRooms();
-  }, []);
+  const [searchParams] = useSearchParams();
+  const amenitiesParam = searchParams.get("amenities");
+  const initialAmenities = amenitiesParam ? decodeURIComponent(amenitiesParam).split(",") : [];
 
-  const fetchRooms = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("http://localhost:64508/api/Room/GetRooms");
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch rooms');
-      }
+  const date = searchParams.get("date") || "";
+  const startTime = searchParams.get("startTime") || "09:00";
+  const endTime = searchParams.get("endTime") || "15:00";
+  const title = searchParams.get("title") || "";
+  const endDate = searchParams.get("endDate") || "";
 
-      const data = await response.json();
-      console.log('Fetched rooms:', data);
-      
-      // Transform backend data to match Room interface
-      const formattedRooms: Room[] = data.map((room: any) => ({
-        id: room.roomId,
-        name: room.roomName,
-        floor: room.floorNumber || "Unknown Floor",
-        image: room.roomImage || "/assets/meeting-room2.jpg",
-        amenities: room.amenities?.map((a: any) => a.amenityName) || [],
-        capacity: room.capacity || 0,
-      }));
-      
-      setRooms(formattedRooms);
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
-      // Keep empty array on error
-      setRooms([]);
-    } finally {
-      setLoading(false);
-    }
+  // Helper function to get floor suffix
+  const getFloorSuffix = (floor: string | number) => {
+    const num = typeof floor === 'string' ? parseInt(floor) : floor;
+    if (num === 1) return '1st';
+    if (num === 2) return '2nd';
+    if (num === 3) return '3rd';
+    return `${num}th`;
   };
 
-  const filteredRooms = rooms.filter((room) => {
-    return (
-      room.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedDate === "" || room.floor.includes(selectedDate))
-    );
+  // Helper function to get default image
+  const getDefaultImage = (id: number) => {
+    const images = [
+      "/assets/meeting-room2.jpg",
+      "/assets/meeting-room7.png",
+      "/assets/meeting-room4.png",
+      "/assets/meeting-room5.jpg",
+      "/assets/meeting-room6.png"
+    ];
+    return images[(id - 1) % images.length];
+  };
+
+  // Fetch rooms and amenities from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log('Fetching data from backend...');
+        const [roomsResponse, amenitiesResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/GetRooms`),
+          fetch(`${API_BASE_URL}/GetAmenities`)
+        ]);
+
+        if (!roomsResponse.ok || !amenitiesResponse.ok) {
+          throw new Error('Failed to fetch rooms or amenities');
+        }
+
+        const roomsData = await roomsResponse.json();
+        const amenitiesData: Amenity[] = await amenitiesResponse.json();
+
+        console.log('Fetched rooms:', roomsData);
+        console.log('Fetched amenities:', amenitiesData);
+
+        // Transform backend data to Browse format
+        const transformedRooms: Room[] = roomsData.map((room: any) => ({
+          id: room.id,
+          name: room.roomName,
+          floor: `${getFloorSuffix(room.floorNumber)} Floor`,
+          image: room.coverPhoto || getDefaultImage(room.id),
+          amenities: Array.isArray(room.amenities) 
+            ? room.amenities.map((amenity: any) => amenity.name || amenity)
+            : [],
+          capacity: room.capacity,
+        }));
+
+        setAllRooms(transformedRooms);
+        setAllAmenities(amenitiesData);
+        
+      } catch (error) {
+        console.error('Error fetching data from backend:', error);
+        // Fallback data if backend is down
+        setAllRooms([
+          {
+            id: 1,
+            name: "Board Room",
+            floor: "6th Floor",
+            image: "/assets/meeting-room2.jpg",
+            amenities: ["Video Conferencing", "Smart TV", "Projector"],
+            capacity: 12,
+          },
+          {
+            id: 2,
+            name: "Innovation Hub",
+            floor: "6th Floor",
+            image: "/assets/meeting-room7.png",
+            amenities: ["Coffee Machine", "Whiteboard", "Ergonomic Chairs"],
+            capacity: 8,
+          }
+        ]);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Filter rooms based on search and amenities
+  const filteredRooms = allRooms.filter((room) => {
+    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesAmenities = initialAmenities.length === 0 || 
+      initialAmenities.every(amenity => 
+        room.amenities.some(roomAmenity => 
+          roomAmenity.toLowerCase().includes(amenity.toLowerCase())
+        )
+      );
+    
+    return matchesSearch && matchesAmenities;
   });
 
   const roomsPerPage = 16;
@@ -112,14 +185,28 @@ export const Browse = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          
           <button>SEARCH</button>
         </div>
 
         <div className="rooms-grid">
-          {loading ? (
-            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>
-              <p>Loading rooms...</p>
+          {currentRooms.map((room) => (
+            <div
+              key={room.id}
+              className="room-card"
+              onClick={() => openModal(room)}
+            >
+              <img 
+                src={room.image} 
+                alt={room.name} 
+                className="room-image"
+                onError={(e) => {
+                  e.currentTarget.src = getDefaultImage(room.id);
+                }}
+              />
+              <div className="room-details">
+                <p>{room.floor}</p>
+                <p>{room.name}</p>
+              </div>
             </div>
           ) : currentRooms.length === 0 ? (
             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>
@@ -142,23 +229,25 @@ export const Browse = () => {
           )}
         </div>
 
-        <div className="pagination">
-          <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>
-            &lt;
-          </button>
-          {Array.from({ length: Math.min(totalPages, 10) }, (_, index) => (
-            <button
-              key={index + 1}
-              onClick={() => setCurrentPage(index + 1)}
-              className={currentPage === index + 1 ? "active" : ""}
-            >
-              {index + 1}
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}>
+              &lt;
             </button>
-          ))}
-          <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}>
-            &gt;
-          </button>
-        </div>
+            {Array.from({ length: Math.min(totalPages, 10) }, (_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => setCurrentPage(index + 1)}
+                className={currentPage === index + 1 ? "active" : ""}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}>
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
 
       {isModalOpen && selectedRoom && (
@@ -192,6 +281,9 @@ export const Browse = () => {
                 src={selectedRoom.image}
                 alt={selectedRoom.name}
                 className="modal-image"
+                onError={(e) => {
+                  e.currentTarget.src = getDefaultImage(selectedRoom.id);
+                }}
               />
             </div>
             <div className="modal-divider"></div>
@@ -224,10 +316,18 @@ export const Browse = () => {
       {showBookingModal && selectedRoom && (
         <BookingModal
           room={selectedRoom}
+          bookingData={{
+            date,
+            startTime,
+            endTime,
+            purpose: title,
+            amenities: initialAmenities,
+            endDate: endDate
+          }}
           onClose={(goBack) => {
             setShowBookingModal(false);
             if (goBack) {
-              setIsModalOpen(true); // return to preview modal
+              setIsModalOpen(true);
             }
           }}
         />

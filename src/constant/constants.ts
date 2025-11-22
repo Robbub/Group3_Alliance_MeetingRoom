@@ -66,6 +66,14 @@ export const PATHS = {
   USER_MANAGEMENT: {
     path: "/usermanagement",
     label: "User Management",
+  },  
+  BOOK: {
+    path: "/book",
+    label: "Book"
+  },
+  BOOK_ROOMS: {
+    path: "/book/rooms",
+    label: "Book Rooms"
   },
   ADMIN_DASHBOARD: {
     path: "/admin-dashboard",

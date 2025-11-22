@@ -1,10 +1,24 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
 import './AddUserModal.css';
+
+interface User {
+  id: number | string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  password?: string;
+  role: string;
+  avatar?: string;
+  lastSeen?: string;
+  name?: string;
+}
 
 interface AddUserFormData {
   firstName: string;
   lastName: string;
   email: string;
+  username: string; 
   password: string;
   confirmPassword: string;
   role: string;
@@ -13,129 +27,210 @@ interface AddUserFormData {
 
 interface AddUserModalProps {
   onClose: () => void;
-  onAddUser: (data: AddUserFormData) => void;
+  onAddUser: () => void;
+  editingUser?: User | null; 
 }
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onAddUser }) => {
+const AddUserModal: React.FC<AddUserModalProps> = ({ onClose, onAddUser, editingUser }) => {
   const [formData, setFormData] = useState<AddUserFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
+    firstName: editingUser?.firstName || '',
+    lastName: editingUser?.lastName || '',
+    email: editingUser?.email || '',
+    username: editingUser?.username || '', 
     password: '',
     confirmPassword: '',
-    role: '',
+    role: editingUser?.role || 'user',
     avatar: null,
   });
 
+  const [avatarPreview, setAvatarPreview] = useState<string>(
+    editingUser?.avatar || "https://cdn-icons-png.flaticon.com/512/706/706830.png"
+  );
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
-      setFormData({ ...formData, role: checked ? value : '' });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData({ ...formData, avatar: file });
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setAvatarPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleSubmit = () => {
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+  const getDisplayRole = (role: string): string => {
+    switch (role) {
+      case "user": return "Member";
+      case "admin": return "Admin"; 
+      case "super admin": return "Super Admin";
+      default: return "Member";
+    }
+  };
+
+  const handleRoleChange = (role: string) => {
+    const dbRole = role === "Member" ? "user" :
+                  role === "Admin" ? "admin" : "super admin";
+    setFormData({ ...formData, role: dbRole });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.username || !formData.firstName || !formData.lastName) {
+      alert("Please fill in all required fields");
       return;
     }
 
-    onAddUser(formData);
-    onClose();
+    if (!editingUser && (!formData.password || formData.password !== formData.confirmPassword)) {
+      alert("Password and confirm password must match");
+      return;
+    }
+    
+    try {
+      if (editingUser) {
+        // UPDATE USER
+        const response = await fetch(`https://localhost:3150/api/Account/UpdateUser/${editingUser.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            UserId: formData.username,
+            FirstName: formData.firstName,
+            LastName: formData.lastName,
+            Role: formData.role,
+            Email: formData.email || "" // Send empty string if no email, NOT username
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error("Update error:", errorData);
+          throw new Error("Failed to update user");
+        }
+      } else {
+        // ADD NEW USER
+        const response = await fetch("https://localhost:3150/api/Account/Register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            UserId: formData.username,
+            Password: formData.password,
+            FirstName: formData.firstName,
+            LastName: formData.lastName,
+            Role: formData.role,
+            Email: formData.email || "" // Send empty string if no email, NOT username
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error("Register error:", errorData);
+          throw new Error("Failed to add user");
+        }
+      }
+      
+      onAddUser();
+      onClose();
+    } catch (error: unknown) {
+      console.error("Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      alert(`Operation failed: ${errorMessage}`);
+    }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="add-user-modal">
-        <button className="close-button" onClick={onClose}>×</button>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Add New User</h2>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="add-user-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="close-button" onClick={onClose}>✕</button>
+        <h2>{editingUser ? 'Edit User' : 'Add New User'}</h2>
 
         <div className="avatar-section">
-          <div className="avatar">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/706/706830.png"
-              alt="avatar"
-              style={{ width: '100%', height: '100%', borderRadius: '50%' }}
-            />
+          <div className="avatar-container">
+            <img src={avatarPreview} alt="User Avatar" className="avatar-preview" />
           </div>
           <label className="upload-btn">
-            Upload
-            <input type="file" onChange={handleFileChange} style={{ display: 'none' }} />
+            📤 Upload
+            <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
           </label>
         </div>
 
-       <div className="form-group">
-  <label htmlFor="firstName">First Name</label>
-  <input
-    id="firstName"
-    type="text"
-    name="firstName"
-    value={formData.firstName}
-    onChange={handleInputChange}
-  />
+        <div className="form-row">
+          <input 
+            type="text" 
+            placeholder="First Name" 
+            name="firstName" 
+            value={formData.firstName} 
+            onChange={handleInputChange} 
+            required
+          />
+          <input 
+            type="text" 
+            placeholder="Last Name" 
+            name="lastName" 
+            value={formData.lastName} 
+            onChange={handleInputChange} 
+            required
+          />
+        </div>
 
-  <label htmlFor="lastName">Last Name</label>
-  <input
-    id="lastName"
-    type="text"
-    name="lastName"
-    value={formData.lastName}
-    onChange={handleInputChange}
-  />
+        <input 
+          type="text" 
+          placeholder="Username" 
+          name="username" 
+          value={formData.username} 
+          onChange={handleInputChange} 
+          required
+          className="username-input"
+        />
 
-  <label htmlFor="email">Username / Email</label>
-  <input
-    id="email"
-    type="email"
-    name="email"
-    value={formData.email}
-    onChange={handleInputChange}
-  />
+        <input 
+          type="email" 
+          placeholder="Email" 
+          name="email" 
+          value={formData.email} 
+          onChange={handleInputChange} 
+        />
 
-  <label htmlFor="password">Enter Password</label>
-  <input
-    id="password"
-    type="password"
-    name="password"
-    value={formData.password}
-    onChange={handleInputChange}
-  />
+        <input 
+          type="password" 
+          placeholder={editingUser ? "New Password (optional)" : "Password"} 
+          name="password" 
+          value={formData.password} 
+          onChange={handleInputChange} 
+          required={!editingUser}
+        />
+        
+        <input 
+          type="password" 
+          placeholder="Confirm Password" 
+          name="confirmPassword" 
+          value={formData.confirmPassword} 
+          onChange={handleInputChange} 
+          required={!editingUser}
+        />
 
-  <label htmlFor="confirmPassword">Confirm Password</label>
-  <input
-    id="confirmPassword"
-    type="password"
-    name="confirmPassword"
-    value={formData.confirmPassword}
-    onChange={handleInputChange}
-  />
-</div>
+        <div className="role-section">
+          {['Member', 'Admin', 'Super Admin'].map((role) => (
+            <label key={role}>
+              <input 
+                type="radio" 
+                name="role" 
+                value={role} 
+                checked={getDisplayRole(formData.role) === role} 
+                onChange={() => handleRoleChange(role)} 
+              />
+              {role}
+            </label>
+          ))}
+        </div>
 
-<div className="role-section">
-  <span>Role:</span>
-  {[' Member', ' Admin', ' Super Admin'].map((role) => (
-    <label key={role}>
-      <input
-        type="checkbox"
-        name="role"
-        value={role}
-        checked={formData.role === role}
-        onChange={handleInputChange}
-      />
-      {role}
-    </label>
-  ))}
-</div>
-
-
-        <button className="submit-btn" onClick={handleSubmit}>Add User</button>
+        <button className="submit-btn" onClick={handleSubmit}>
+          {editingUser ? 'Update User' : 'Add User'}
+        </button>
       </div>
     </div>
   );

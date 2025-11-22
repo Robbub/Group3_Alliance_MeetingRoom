@@ -3,8 +3,8 @@ import "./MassActionModal.css";
 
 interface MassActionModalProps {
   selectedUserIds: number[];
-  onChangeRole: (role: string) => void;
-  onDeleteSelected: () => void;
+  onChangeRole: (role: string, ids: number[]) => void;
+  onDeleteSelected: (ids: number[]) => void;
   onCancel: () => void;
 }
 
@@ -22,7 +22,7 @@ const MassActionModal: React.FC<MassActionModalProps> = ({
         className="mass-role-dropdown"
         onChange={(e) => {
           const newRole = e.target.value;
-          if (newRole) onChangeRole(newRole);
+          if (newRole) onChangeRole(newRole, selectedUserIds);
         }}
       >
         <option value="">Change Role To...</option>
@@ -31,7 +31,7 @@ const MassActionModal: React.FC<MassActionModalProps> = ({
         <option value="Super Admin">Super Admin</option>
       </select>
 
-      <button className="delete-selected-btn" onClick={onDeleteSelected}>
+      <button className="delete-selected-btn" onClick={() => onDeleteSelected(selectedUserIds)}>
         Delete Selected
       </button>
 

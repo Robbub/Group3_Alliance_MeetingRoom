@@ -13,6 +13,7 @@ body {
 .upcoming-bookings-title {
   color: #64442F;
   text-align: center;
+  margin-top: 20px;
   margin-bottom: 20px;
   font-size: 45px;
   font-weight: bolder;
@@ -65,7 +66,8 @@ body {
 
 .upcoming-booking-card {
   display: flex;
-  background-color: white;
+  background-color: #ebded4;
+  border: 3px solid #9C6644;
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
@@ -149,6 +151,42 @@ body {
   width: 200px;
   text-align: center;
   font-weight: 600;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.pagination button {
+  padding: 10px 15px;
+  background-color: #EDE0D4;
+  color: #64442F;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination button.active {
+  background-color: #64442F;
+  color: white;
+}
+
+.pagination button:first-child,
+.pagination button:last-child {
+  background-color: transparent;
+  color: #64442F;
+  font-size: 20px;
+  width: auto;
+  padding: 0 10px;
 }
 
 .modal {

@@ -1,13 +1,18 @@
-.room-management-main {
-  padding: 30px 40px;
-  flex: 1;
+.room-management-page {
+  font-family: 'Poppins', sans-serif;
+  background-color: #fffaf5;
+  color: #5e3d2c;
+  margin-bottom: 0;
+  min-height: 100vh;
+  min-width: 100vw;
 }
 
-.room-management-header {
-  margin-bottom: 30px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.room-management-content {
+  max-width: 2200px;
+  margin: 30px auto 0px auto;
+  padding: 0 75px;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .sidebar-toggle-btn {
@@ -30,17 +35,36 @@
   border-radius: 4px;
 }
 
-.room-management-header h1 {
-  font-size: 2rem;
-  color: #64442F;
-  margin: 0 0 5px 0;
-  font-weight: 700;
+.add-room-btn {
+  background-color: #ff9900;
+  color: #1a1a1a;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
 }
 
-.page-subtitle {
-  color: #999;
-  font-size: 1rem;
-  margin: 0;
+.add-room-btn:hover {
+  background-color: #e68a00;
+}
+
+.search-and-add {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.search-input {
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: 2px solid #e1c5a5;
+  background-color: #fef8f2;
+  color: #5c3b22;
+  width: 300px;
+  margin-bottom: 20px; 
 }
 
 .add-room-btn-header {
@@ -123,7 +147,7 @@
 .room-management-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #EDE0D4;
+  table-layout: fixed;
 }
 
 .room-management-table thead {
@@ -146,18 +170,53 @@
   transition: background-color 0.2s ease;
 }
 
-.room-management-table tbody tr:hover {
-  background-color: #e4d5c4;
+.room-photo {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e1c5a5;
+}
+
+/* Update the table cell for photo column */
+.room-table td {
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+/* Specific styling for photo column */
+.room-table td:nth-child(3) {
+  width: 15%; /* Match the header width */
+  text-align: left; /* <-- This is the key change */
+  padding: 12px 10px;
+}
+
+/* Style the image inside the photo cell */
+.room-table td:nth-child(3) img {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e1c5a5;
+  /* Optional: Add a small margin to create some space from the left edge */
+  margin-right: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
 }
 
 .room-management-table tbody tr:last-child {
   border-bottom: none;
 }
 
-.room-management-table td {
-  padding: 18px 20px;
+.action-btn.edit {
   color: #64442F;
-  font-size: 15px;
+}
+
+.action-btn.delete {
+  color: red;
 }
 
 /* Amenities */
@@ -176,145 +235,81 @@
   font-weight: 500;
 }
 
-/* Status Badges */
-.status-badge {
-  display: inline-block;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: lowercase;
+/* Responsive */
+@media (max-width: 768px) {
+  .room-management-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .search-input {
+    width: 100%;
+  }
+  .room-table th,
+  .room-table td {
+    font-size: 13px;
+    padding: 10px;
+  }
 }
 
-.status-badge.published {
-  background-color: #5a9d6c;
-  color: white;
-}
-
-.status-badge.unpublished {
-  background-color: #E57373;
-  color: white;
-}
-
-/* Action Buttons */
-.action-buttons {
+/* Pagination - Matches UserManagement style */
+.pagination {
   display: flex;
   gap: 10px;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
+  margin-top: 20px;
+  gap: 10px;
 }
 
-.action-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  border: 2px solid;
-  background-color: rgb(255, 255, 255);
-  border-color: #4a2d1a;
+.pagination-btn {
+  padding: 10px 15px;
+  background-color: #EDE0D4;
+  color: #64442F;
+  border: none;
+  border-radius: 50%;
   cursor: pointer;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  transition: all 0.3s ease;
-  padding: 0;
 }
 
-.action-btn.publish-btn {
-  border-color: #4CAF50;
-  color: #4CAF50;
+.pagination-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-.action-btn.publish-btn:hover {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.action-btn.unpublish-btn {
-  border-color: #E57373;
-  color: #E57373;
-}
-
-.action-btn.unpublish-btn:hover {
-  background-color: #E57373;
-  color: white;
-}
-
-.action-btn.edit-btn {
-  border-color: #2196F3;
-  color: #2196F3;
-}
-
-.action-btn.edit-btn:hover {
-  background-color: #2196F3;
-  color: white;
-}
-
-.action-btn.delete-btn {
-  border-color: #f44336;
-  color: #f44336;
-}
-
-.action-btn.delete-btn:hover {
-  background-color: #f44336;
-  color: white;
-}
-
-.action-btn:active {
-  transform: scale(0.95);
-}
-
-/* Modal styling */
-.modal-dialog-centered {
+.page-number {
+  padding: 10px 15px;
+  background-color: #EDE0D4;
+  color: #64442F;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100% - 1rem);
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .room-management-table {
-    font-size: 14px;
-  }
-
-  .room-management-table th,
-  .room-management-table td {
-    padding: 15px;
-  }
+.page-number.active {
+  background-color: #64442F;
+  color: white;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
-  .room-management-main {
-    padding: 20px;
+  .pagination {
+    gap: 8px;
   }
-
-  .room-management-header {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .add-room-btn-header {
-    width: 100%;
-    justify-content: center;
-    margin-left: 0;
-  }
-
-  .room-management-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-box {
-    max-width: 100%;
-  }
-
-  .room-management-table-container {
-    overflow-x: auto;
-  }
-
-  .room-management-table {
-    min-width: 800px;
+  .pagination-btn,
+  .page-number {
+    width: 35px;
+    height: 35px;
+    padding: 8px 12px;
+    font-size: 14px;
   }
 }
